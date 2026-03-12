@@ -81,6 +81,9 @@
 - **执行逻辑增强**：
   - 在 `toggleFolderSelection` 中，除了 `click()` 之外，增加 `dispatchEvent(new Event('change', { bubbles: true }))`，确保响应式框架（Angular）感知状态变化。
   - 确保寻找原生 Checkbox 的逻辑不仅限于 `input`，如果存在父级容器则点击父级容器。
+### [v4.73] 界面精简
+- **移除未受支持特性**：彻底屏蔽并移除了在 `v4.12` 中引入但在当前数据流转机制中表现不完善的”按名称/时间排序“逻辑以及工具栏触发按钮。
+
 ### [v4.71] 搜索面板销毁机制补全
 - **事件闭环**：在 `toggleSearchPanel` 方法的 `else`（即隐藏面板）分支中，不仅移除 DOM 节点，还要显式将 `this.searchQuery = ''`，并主动调用 `this.applyFilter()`，以保证查询上下文在面板消失时立刻清零并恢复列表原状。
 

@@ -7,8 +7,6 @@ const NotebookManager = {
   displayMode: 'single', 
   collapsedFolderIds: [], 
   searchQuery: '', // 4.12: 搜索内容
-  sortBy: 'time',  // 4.12: 'time' | 'name'
-  sortOrder: 'asc',
   isDeepMode: true, // 4.23: 默认开启深度集成以支持隐藏原生列表
   editingFolderId: null, // 4.35: 正在编辑名称的文件夹 ID
   isSearchOpen: false, // 4.60: 搜索面板显示状态
@@ -241,17 +239,10 @@ const NotebookManager = {
       const listWithMeta = list.map((item, idx) => ({ ...item, originalIndex: idx }));
       
       // 2. 4.63: 过滤逻辑统合至 applyFilter，此处仅处理原始列表索引
-      let filtered = listWithMeta;
       // 移除原有的简易 includes 过滤，统一由 applyFilter 在渲染后处理显示隐藏
 
-      // 3. 排序
-      return filtered.sort((a, b) => {
-        if (this.sortBy === 'name') {
-          return a.name.localeCompare(b.name) * (this.sortOrder === 'asc' ? 1 : -1);
-        } else {
-          return (a.originalIndex - b.originalIndex) * (this.sortOrder === 'asc' ? 1 : -1);
-        }
-      });
+      // 直接原样返回（已弃用之前的 sortBy 逻辑）
+      return listWithMeta;
     };
 
     const displaySources = getFilteredAndSorted(this.sources);
@@ -443,23 +434,10 @@ const NotebookManager = {
         this.refreshData();
       });
 
-      // 4.12: 排序按钮
-      const sortBtn = document.createElement('div');
-      sortBtn.className = `nb-ext-toolbar-icon ${this.sortBy === 'name' ? 'active' : ''}`;
-      const sortIcon = document.createElement('span');
-      sortIcon.className = 'material-symbols-outlined';
-      sortIcon.textContent = this.sortBy === 'name' ? 'sort_by_alpha' : 'schedule';
-      sortBtn.appendChild(sortIcon);
-      sortBtn.title = this.sortBy === 'name' ? 'Sorted by Name (Click to sort by Date)' : 'Sorted by Date (Click to sort by Name)';
-      sortBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        this.sortBy = this.sortBy === 'name' ? 'time' : 'name';
-        this.refreshData();
-      });
+
 
       toolbar.appendChild(viewToggle);
       toolbar.appendChild(modeToggle);
-      toolbar.appendChild(sortBtn);
       toolbar.appendChild(addDirBtn);
     }
 

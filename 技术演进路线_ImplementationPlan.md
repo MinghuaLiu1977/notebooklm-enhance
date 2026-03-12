@@ -81,6 +81,12 @@
 - **执行逻辑增强**：
   - 在 `toggleFolderSelection` 中，除了 `click()` 之外，增加 `dispatchEvent(new Event('change', { bubbles: true }))`，确保响应式框架（Angular）感知状态变化。
   - 确保寻找原生 Checkbox 的逻辑不仅限于 `input`，如果存在父级容器则点击父级容器。
+### [v4.71] 搜索面板销毁机制补全
+- **事件闭环**：在 `toggleSearchPanel` 方法的 `else`（即隐藏面板）分支中，不仅移除 DOM 节点，还要显式将 `this.searchQuery = ''`，并主动调用 `this.applyFilter()`，以保证查询上下文在面板消失时立刻清零并恢复列表原状。
+
+### [v4.70] 纯英语境适配
+- **本地化重构**：将所有手动注入和维护的 DOM 节点的文本如 `待分类文档`、`移动到...`、`创建文件夹` 及所有悬停提示语全量翻译并在代码中硬替换为纯正英文（如 `Unassigned`、`Move to...`、`Create Folder` 等），与宿主 Google 风格浑然一体。
+
 ### [v4.67] 全局文本样式统合
 - **属性前置**：由于 `.nb-ext-item-row` 没有默认的继承样式，导致未分类区的文字和目录内 `.nb-ext-item` 的文字样式不一。现在将 `font-size: 13px !important;` 和 `color: var(--nb-ext-text-soft) !important;` 直接放置到最内层 `.nb-ext-source-label` 上，彻底统一视觉表现。
 

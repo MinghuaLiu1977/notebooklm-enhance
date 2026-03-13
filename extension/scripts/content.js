@@ -1121,7 +1121,7 @@ const NotebookManager = {
     inputGroup.append(input, btn, errorDiv);
 
     const buyLink = document.createElement('a');
-    buyLink.href = 'https://minghster.gumroad.com/l/cxzucm';
+    buyLink.href = 'https://gumroad.com/l/cxzucm';
     buyLink.target = '_blank';
     buyLink.className = 'nb-ext-buy-link';
     buyLink.textContent = "Don't have a key? Buy it on Gumroad";
@@ -1164,8 +1164,14 @@ const NotebookManager = {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: `product_permalink=cxzucm&license_key=${encodeURIComponent(licenseKey)}`
+        body: `product_id=9KnEA4Z1DE6BlSSJRqONvg==&license_key=${encodeURIComponent(licenseKey)}`
       });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("[NB-Ext] Verify API 500/Error:", response.status, errorText);
+        return false;
+      }
 
       const data = await response.json();
       

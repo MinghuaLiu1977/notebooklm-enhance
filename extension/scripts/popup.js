@@ -72,8 +72,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                body: `product_permalink=cxzucm&license_key=${encodeURIComponent(licenseKey)}`
+                body: `product_id=9KnEA4Z1DE6BlSSJRqONvg==&license_key=${encodeURIComponent(licenseKey)}`
             });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error("[NB-Ext] Verify API (Popup) Error:", response.status, errorText);
+                return false;
+            }
 
             const data = await response.json();
             if (data.success && !data.uses_limit_reached) {

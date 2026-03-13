@@ -14,6 +14,7 @@ const NotebookManager = {
   sidebarObserver: null, // 4.62: 监听侧边栏尺寸
   currentSidebarWidth: 0, // 4.62: 宽缓存
   currentSidebarLeft: 0,  // 4.62: 偏移缓存
+  licenseInfo: null,     // v1.1: 许可证信息
 
   async init() {
     this.notebookId = StorageManager.extractNotebookId();
@@ -76,10 +77,28 @@ const NotebookManager = {
     this.refreshData();
   },
 
+  async checkLicense() {
+    this.licenseInfo = await StorageManager.getLicenseInfo();
+    const now = Date.now();
+    const trialPeriod = this.licenseInfo.trialDays * 24 * 60 * 60 * 1000;
+    const isExpired = !this.licenseInfo.isLicensed && (now - this.licenseInfo.installDate > trialPeriod);
+    this.licenseInfo.isExpired = isExpired;
+    return this.licenseInfo;
+  },
+
   async refreshData() {
-    this.scanDom();
-    const config = await StorageManager.getNotebookConfig(this.notebookId);
-    this.renderSidebarUI(config);
+    try {
+      await this.checkLicense();
+      this.scanDom();
+      const config = await StorageManager.getNotebookConfig(this.notebookId);
+      this.renderSidebarUI(config);
+    } catch (e) {
+      if (e.message.includes('Extension context invalidated')) {
+        console.log("[NB-Ext] Extension context invalidated, stopping refreshes.");
+      } else {
+        console.error("[NB-Ext] Refresh error:", e);
+      }
+    }
   },
 
   scanDom() {
@@ -222,6 +241,13 @@ const NotebookManager = {
     console.log("[NB-Ext] Render requested.");
     const sidebarContent = document.querySelector('.source-panel-content');
     let container = document.getElementById('nb-ext-container');
+    
+    // 如果试用期满且未激活，显示支付墙
+    if (this.licenseInfo && this.licenseInfo.isExpired) {
+      this.renderPaywall();
+      return;
+    }
+    
     let nativeHeader = document.querySelector('.source-panel-header');
     
     // 4.31-4.32: 自适应宿主定位器
@@ -439,6 +465,22 @@ const NotebookManager = {
       toolbar.appendChild(viewToggle);
       toolbar.appendChild(modeToggle);
       toolbar.appendChild(addDirBtn);
+
+      // v1.1.1: 增加激活/购买入口（仅在未授权时显示）
+      if (this.licenseInfo && !this.licenseInfo.isLicensed) {
+        const licenseBtn = document.createElement('div');
+        licenseBtn.className = `nb-ext-toolbar-icon`;
+        const licenseIcon = document.createElement('span');
+        licenseIcon.className = 'material-symbols-outlined';
+        licenseIcon.textContent = 'vpn_key';
+        licenseBtn.appendChild(licenseIcon);
+        licenseBtn.title = 'Purchase or Activate License';
+        licenseBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          this.renderPaywall(true);
+        });
+        toolbar.appendChild(licenseBtn);
+      }
     }
 
     // Inline Folder Creator
@@ -785,18 +827,34 @@ const NotebookManager = {
       // 4.62: 初次渲染立即同步位置
       this.updateSearchPanelPosition();
 
-      panel.innerHTML = `
-        <div class="nb-ext-search-box">
-          <span class="material-symbols-outlined search-hint-icon">search</span>
-          <input type="text" class="nb-ext-search-input-float" placeholder="Advanced Search... (Space=OR, +=AND)" value="${this.searchQuery}" />
-          <span class="material-symbols-outlined search-close-icon">close</span>
-        </div>
-        <div class="nb-ext-search-help">
-          Example: "doc pdf + 2025" matches (doc OR pdf) AND 2025
-        </div>
-      `;
+      panel.textContent = ''; // 清空内容
+
+      const box = document.createElement('div');
+      box.className = 'nb-ext-search-box';
+
+      const hintIcon = document.createElement('span');
+      hintIcon.className = 'material-symbols-outlined search-hint-icon';
+      hintIcon.textContent = 'search';
+
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'nb-ext-search-input-float';
+      input.placeholder = 'Advanced Search... (Space=OR, +=AND)';
+      input.value = this.searchQuery;
+
+      const closeIcon = document.createElement('span');
+      closeIcon.className = 'material-symbols-outlined search-close-icon';
+      closeIcon.textContent = 'close';
+      closeIcon.addEventListener('click', () => this.toggleSearchPanel());
+
+      box.append(hintIcon, input, closeIcon);
+
+      const help = document.createElement('div');
+      help.className = 'nb-ext-search-help';
+      help.textContent = 'Example: "doc pdf + 2025" matches (doc OR pdf) AND 2025';
+
+      panel.append(box, help);
       
-      const input = panel.querySelector('input');
       setTimeout(() => input.focus(), 50);
       
       // 4.61: 增加 IME 支持
@@ -982,6 +1040,143 @@ const NotebookManager = {
     // 4.1: 恢复滚动位置
     if (sidebarContent) {
       sidebarContent.scrollTop = lastScrollTop;
+    }
+  },
+
+  renderPaywall(isManualOpen = false) {
+    let paywall = document.getElementById('nb-ext-paywall');
+    if (!paywall) {
+      paywall = document.createElement('div');
+      paywall.id = 'nb-ext-paywall';
+      paywall.className = 'nb-ext-paywall';
+      document.body.appendChild(paywall);
+    }
+
+    // 处理背景点击关闭（仅限手动打开且非强制过期）
+    if (isManualOpen && !this.licenseInfo.isExpired) {
+      paywall.onclick = (e) => {
+        if (e.target === paywall) paywall.remove();
+      };
+      
+      const escHandler = (e) => {
+        if (e.key === 'Escape') {
+          paywall.remove();
+          document.removeEventListener('keydown', escHandler);
+        }
+      };
+      document.addEventListener('keydown', escHandler);
+    }
+
+    const trialDaysLeft = Math.max(0, this.licenseInfo.trialDays - Math.floor((Date.now() - this.licenseInfo.installDate) / (24 * 60 * 60 * 1000)));
+
+    paywall.textContent = ''; // 清空背景
+
+    const modal = document.createElement('div');
+    modal.className = 'nb-ext-paywall-modal';
+    paywall.appendChild(modal);
+
+    // 如果是手动打开，添加关闭按钮
+    if (isManualOpen && !this.licenseInfo.isExpired) {
+      const closeBtn = document.createElement('span');
+      closeBtn.className = 'material-symbols-outlined';
+      closeBtn.style.cssText = 'position:absolute; top:16px; right:16px; cursor:pointer; color:#5f6368; font-size:20px;';
+      closeBtn.textContent = 'close';
+      closeBtn.onclick = () => paywall.remove();
+      modal.appendChild(closeBtn);
+    }
+
+    const icon = document.createElement('span');
+    icon.className = 'material-symbols-outlined nb-ext-paywall-icon';
+    icon.textContent = this.licenseInfo.isExpired ? 'lock' : 'verified_user';
+
+    const title = document.createElement('div');
+    title.className = 'nb-ext-paywall-title';
+    title.textContent = this.licenseInfo.isExpired ? 'Trial Period Expired' : 'NotebookLM Enhancer';
+
+    const desc = document.createElement('div');
+    desc.className = 'nb-ext-paywall-desc';
+    desc.textContent = this.licenseInfo.isExpired ? 
+      'Your 7-day free trial of NotebookLM Enhancer has ended. Purchase a lifetime license to continue using directory management and advanced search.' :
+      `You are currently using a free trial. ${trialDaysLeft} days remaining. Upgrade now to unlock lifetime access.`;
+
+    const inputGroup = document.createElement('div');
+    inputGroup.className = 'nb-ext-license-input-group';
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'nb-ext-license-input';
+    input.id = 'nb-ext-license-key-input';
+    input.placeholder = 'Enter License Key...';
+
+    const btn = document.createElement('button');
+    btn.className = 'nb-ext-activate-btn';
+    btn.id = 'nb-ext-activate-btn';
+    btn.textContent = 'Activate Lifetime Access';
+
+    const errorDiv = document.createElement('div');
+    errorDiv.id = 'nb-ext-license-error';
+    errorDiv.className = 'nb-ext-license-error';
+    errorDiv.style.display = 'none';
+
+    inputGroup.append(input, btn, errorDiv);
+
+    const buyLink = document.createElement('a');
+    buyLink.href = 'https://minghster.gumroad.com/l/cxzucm';
+    buyLink.target = '_blank';
+    buyLink.className = 'nb-ext-buy-link';
+    buyLink.textContent = "Don't have a key? Buy it on Gumroad";
+
+    modal.append(icon, title, desc, inputGroup, buyLink);
+
+    btn.onclick = async () => {
+      const key = input.value.trim();
+      if (!key) return;
+
+      btn.disabled = true;
+      btn.textContent = 'Verifying...';
+      errorDiv.style.display = 'none';
+
+      try {
+        const success = await this.verifyLicense(key);
+        if (success) {
+          location.reload(); // 激活成功后刷新页面
+        } else {
+          errorDiv.textContent = 'Invalid license key. Please check and try again.';
+          errorDiv.style.display = 'block';
+          btn.disabled = false;
+          btn.textContent = 'Activate Lifetime Access';
+        }
+      } catch (err) {
+        errorDiv.textContent = 'Verification error. Please try again later.';
+        errorDiv.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Activate Lifetime Access';
+      }
+    };
+  },
+
+  async verifyLicense(licenseKey) {
+    // Gumroad API 验证
+    // https://gumroad.com/dev#licenses
+    try {
+      const response = await fetch('https://api.gumroad.com/v2/licenses/verify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `product_permalink=cxzucm&license_key=${encodeURIComponent(licenseKey)}`
+      });
+
+      const data = await response.json();
+      
+      if (data.success && !data.uses_limit_reached) {
+        await StorageManager.setLicense(licenseKey, true);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("[NB-Ext] License verification failed:", error);
+      throw error;
     }
   }
 };

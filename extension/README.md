@@ -1,8 +1,8 @@
-# NotebookLM Master (Browser Extension)
+# NotebookLM Enhancer (Browser Extension)
 
-**NotebookLM Master** 是一款专为 Google NotebookLM 深度定制的非官方浏览器扩展。它致力于解决原生界面在处理海量文档时的交互痛点，通过引入**文件目录管理**、**高级搜索系统**、**响应式界面调整**以及**深度系统集成**，全面提升知识管理效率与阅读体验。
+**NotebookLM Enhancer** 是一款专为 Google NotebookLM 深度定制的非官方浏览器扩展。它致力于解决原生界面在处理海量文档时的交互痛点，通过引入**文件目录管理**、**高级搜索系统**、**响应式界面调整**以及**深度系统集成**，全面提升知识管理效率与阅读体验。
 
-![NotebookLM Master Logo](icons/icon.svg)
+![NotebookLM Enhancer Logo](icons/icon.svg)
 
 ---
 

@@ -1,3 +1,17 @@
+# NotebookLM 扩展功能更新 - v1.1.3
+
+正式发布至 Chrome Web Store！您现在可以通过官方商店直接安装和更新。
+
+[**Chrome 网上应用店下载链接**](https://chromewebstore.google.com/detail/notebooklm-enhancer/geedlihiipifeifhnmjhmnmkffanlhpg)
+
+## 已完成的主要更新
+
+### 官方商店发布 (v1.1.3)
+- **正式上架**：完成了 Chrome Web Store 的审核并正式发布，用户可以通过官方渠道获得更安全的安装和自动更新体验。
+- **文档同步**：更新了 `README.md` 和相关指南，指引用户优先使用商店版本。
+
+---
+
 # NotebookLM 扩展功能更新 - v1.1.2
 
 我修复了许可证验证系统的 500 错误，并统一了支付链接域名。

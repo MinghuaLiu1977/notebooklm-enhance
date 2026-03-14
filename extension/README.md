@@ -1,3 +1,17 @@
+# NotebookLM 扩展功能更新 - v1.1.3
+
+正式发布至 Chrome Web Store！您现在可以通过官方商店直接安装和更新。
+
+[**Chrome 网上应用店下载链接**](https://chromewebstore.google.com/detail/notebooklm-enhancer/geedlihiipifeifhnmjhmnmkffanlhpg)
+
+## 已完成的主要更新
+
+### 官方商店发布 (v1.1.3)
+- **正式上架**：完成了 Chrome Web Store 的审核并正式发布，用户可以通过官方渠道获得更安全的安装和自动更新体验。
+- **文档同步**：更新了 `README.md` 和相关指南，指引用户优先使用商店版本。
+
+---
+
 # NotebookLM Enhancer (Browser Extension)
 
 **NotebookLM Enhancer** is an unofficial browser extension deeply customized for Google NotebookLM. It addresses interaction pain points in the native interface when handling massive documents by introducing **directory management**, an **advanced search system**, **responsive UI adjustments**, and **deep system integration**, significantly enhancing knowledge management efficiency and the reading experience.
@@ -41,7 +55,12 @@ Beyond simple CSS overrides, the extension reconstructs interaction logic at the
 
 ## 🚀 Installation Guide
 
-Since it is not yet on the Chrome Web Store, please load it manually via **Developer Mode**:
+### Official Method (Recommended)
+Install the official version directly from the **Chrome Web Store**:
+[**Add to Chrome - NotebookLM Enhancer**](https://chromewebstore.google.com/detail/notebooklm-enhancer/geedlihiipifeifhnmjhmnmkffanlhpg)
+
+### Manual Method (For Developers)
+If you prefer to load it manually via **Developer Mode**:
 
 1. Download or clone this repository:
    ```bash

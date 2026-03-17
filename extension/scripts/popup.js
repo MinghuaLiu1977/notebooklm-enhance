@@ -5,8 +5,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     const activateBtn = document.getElementById('activate-btn');
     const errorMsg = document.getElementById('error-msg');
     const activationSection = document.getElementById('activation-section');
+    const enabledToggle = document.getElementById('enabled-toggle');
 
     const licenseInfo = await StorageManager.getLicenseInfo();
+    const isEnabled = await StorageManager.getEnabledState();
+    
+    // Initialize toggle state
+    enabledToggle.checked = isEnabled;
+
+    enabledToggle.addEventListener('change', async () => {
+        const newState = enabledToggle.checked;
+        await StorageManager.setEnabledState(newState);
+        
+        // Refresh all NotebookLM tabs
+        chrome.tabs.query({url: "https://notebooklm.google.com/*"}, (tabs) => {
+            tabs.forEach(tab => chrome.tabs.reload(tab.id));
+        });
+    });
     
     const updateUI = () => {
         if (licenseInfo.isLicensed) {

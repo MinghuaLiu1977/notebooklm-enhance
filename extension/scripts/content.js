@@ -19,6 +19,44 @@ var NotebookManager = {
   sidebarObserver: null,
 
   async init() {
+    // Check if extension is enabled
+    const isEnabled = await StorageManager.getEnabledState();
+    if (!isEnabled) {
+      console.log("[NB-Ext] Extension is disabled. Skipping initialization.");
+      return;
+    }
+
+    // 1. Storage Bridge: Listen for Popup requests
+    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+      if (request.action === 'getNotebookConfig') {
+        StorageManager.getNotebookConfig(request.notebookId).then(sendResponse);
+        return true; // Keep channel open for async
+      }
+      if (request.action === 'saveNotebookConfig') {
+        StorageManager.saveNotebookConfig(request.notebookId, request.config);
+        sendResponse({ success: true });
+      }
+    });
+
+    // 2. Data Migration: One-time migration from Local Extension Storage to Page LocalStorage
+    try {
+      const migrationFlag = `nb_ext_migrated_${chrome.runtime.id}`;
+      if (!localStorage.getItem(migrationFlag)) {
+        console.log("[NB-Ext] Starting data migration to localStorage...");
+        const localData = await chrome.storage.local.get(null);
+        for (const key in localData) {
+          if (key.startsWith('notebook_config_')) {
+            localStorage.setItem(key, JSON.stringify(localData[key]));
+            console.log(`[NB-Ext] Migrated: ${key}`);
+          }
+        }
+        localStorage.setItem(migrationFlag, 'true');
+        console.log("[NB-Ext] Migration complete.");
+      }
+    } catch (e) {
+      console.error("[NB-Ext] Migration failed:", e);
+    }
+
     this.notebookId = StorageManager.extractNotebookId();
     if (!this.notebookId) return;
 
@@ -157,14 +195,21 @@ var NotebookManager = {
       const parent = el.closest('.mat-mdc-list-item') || el.parentElement;
       const moreBtn = parent.querySelector('[id^="source-item-more-button-"]');
       const name = el.getAttribute('aria-label') || el.innerText || "Unknown";
+      
+      // Detect loading state (spinner or indeterminate state)
+      const hasSpinner = !!parent.querySelector('mat-progress-spinner, .mat-mdc-progress-spinner, [role="progressbar"]');
+      
       return { 
         id: moreBtn ? moreBtn.id.replace('source-item-more-button-', '') : `auto-${name.replace(/\s+/g, '')}`,
-        name, element: el, checkbox: parent.querySelector('input[type="checkbox"]') 
+        name, 
+        element: el, 
+        checkbox: parent.querySelector('input[type="checkbox"]'),
+        isLoading: hasSpinner
       };
     });
 
-    const hasChanged = JSON.stringify(newSources.map(s => ({ id: s.id, name: s.name, checked: !!s.checkbox?.checked }))) !== 
-                      JSON.stringify(this.sources.map(s => ({ id: s.id, name: s.name, checked: !!s.checkbox?.checked })));
+    const hasChanged = JSON.stringify(newSources.map(s => ({ id: s.id, name: s.name, checked: !!s.checkbox?.checked, isLoading: s.isLoading }))) !== 
+                      JSON.stringify(this.sources.map(s => ({ id: s.id, name: s.name, checked: !!s.checkbox?.checked, isLoading: s.isLoading })));
 
     if (hasChanged || forceRender) {
       if (this.isRendering && !forceRender) return false;

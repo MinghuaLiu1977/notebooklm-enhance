@@ -231,17 +231,26 @@ var UIRenderer = {
     mainContent.style.width = '100%';
 
     const itemBox = document.createElement('span');
-    itemBox.className = 'nb-ext-checkbox-native material-symbols-outlined';
-    NotebookUtils.setCheckboxState(itemBox, item.checkbox?.checked ? 'all' : 'none');
+    
+    if (item.isLoading) {
+      itemBox.className = 'nb-ext-loading-spinner material-symbols-outlined';
+      itemBox.textContent = 'progress_activity';
+      itemBox.title = 'Loading...';
+      // Loading items shouldn't be interactable via checkbox
+      itemBox.style.cursor = 'default';
+    } else {
+      itemBox.className = 'nb-ext-checkbox-native material-symbols-outlined';
+      NotebookUtils.setCheckboxState(itemBox, item.checkbox?.checked ? 'all' : 'none');
 
-    itemBox.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (item.checkbox) {
-        item.checkbox.click();
-        // Explicit multi-stage refresh to ensure state is updated instantly
-        manager.scheduleRefresh([100, 400]);
-      }
-    });
+      itemBox.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (item.checkbox) {
+          item.checkbox.click();
+          // Explicit multi-stage refresh to ensure state is updated instantly
+          manager.scheduleRefresh([100, 400]);
+        }
+      });
+    }
     mainContent.appendChild(itemBox);
 
     const icon = document.createElement('span');

@@ -319,6 +319,22 @@ body.nb-ext-is-collapsed .nb-ext-item-icon {
   border-radius: 4px !important;
 }
 
+/* Loading Spinner Animation */
+.nb-ext-loading-spinner {
+  margin-right: 8px !important;
+  color: var(--nb-ext-primary) !important;
+  animation: nb-ext-spin 2s linear infinite !important;
+  font-size: 20px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+@keyframes nb-ext-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 .nb-ext-text-truncate {
   white-space: nowrap !important;
   overflow: hidden !important;

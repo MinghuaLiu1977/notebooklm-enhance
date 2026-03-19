@@ -47,18 +47,26 @@ var ToolbarManager = {
       this.renderButtons(manager, toolbar);
     }
 
-    if (this.isSourcePanelVisible) {
-      toolbar.style.display = 'flex';
+    const isNotebook = window.location.href.includes('/notebook/');
+    const isMini = !this.isSourcePanelVisible || !this.isToolbarEnabled || !this.isToolbarExpanded;
+
+    if (this.isSourcePanelVisible || (isNotebook && isMini)) {
+      if (toolbar) toolbar.style.display = 'flex';
       const shell = document.querySelector('.nb-ext-floating-shell');
       if (shell) {
         shell.style.visibility = 'visible';
-        shell.classList.remove('nb-ext-shell-collapsed');
+        // Only trigger collapsed visual/pointer state if sidebar is indeed collapsed and we're NOT showing a standalone mini button
+        if (isCollapsed && this.isSourcePanelVisible) {
+          shell.classList.add('nb-ext-shell-collapsed');
+        } else {
+          shell.classList.remove('nb-ext-shell-collapsed');
+        }
       }
     } else {
-      toolbar.style.display = 'flex'; 
+      if (toolbar) toolbar.style.display = 'none';
       const shell = document.querySelector('.nb-ext-floating-shell');
       if (shell) {
-        shell.style.visibility = 'hidden'; // Hide the entire container
+        shell.style.visibility = 'hidden';
         shell.classList.add('nb-ext-shell-collapsed');
       }
     }

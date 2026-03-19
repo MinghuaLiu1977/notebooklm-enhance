@@ -26,6 +26,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const newState = enabledToggle.checked;
                 await StorageManager.setEnabledState(newState);
                 
+                // If enabling, also ensure toolbar is enabled to avoid confusion
+                if (newState) {
+                    await StorageManager.setToolbarEnabled(true);
+                }
+
                 // Refresh all NotebookLM tabs
                 chrome.tabs.query({url: "https://notebooklm.google.com/*"}, (tabs) => {
                     if (tabs) tabs.forEach(tab => chrome.tabs.reload(tab.id));

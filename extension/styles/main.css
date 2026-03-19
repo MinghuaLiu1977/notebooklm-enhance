@@ -40,15 +40,19 @@ body.dark-theme {
   min-height: 200px !important;
 }
 
-/* Visibility suppression in collapsed state */
+/* Visibility suppression in collapsed state - refined to allow toolbar toggle */
 .nb-ext-shell-collapsed {
-    visibility: hidden !important;
     pointer-events: none !important;
 }
 
-.nb-ext-shell-collapsed .nb-ext-search-panel,
-.nb-ext-shell-collapsed .nb-ext-toolbar {
+.nb-ext-shell-collapsed .nb-ext-search-panel {
     visibility: hidden !important;
+}
+
+/* Toolbar itself remains interactable via pointer-events override in its own class if needed, 
+   but here we just ensure it's not forced hidden by the parent's collapse class */
+.nb-ext-shell-collapsed .nb-ext-toolbar {
+    pointer-events: auto !important;
 }
 
 .nb-ext-searching {

@@ -62,18 +62,34 @@ var LayoutEngine = {
         if (isMainListView) {
            // Allow shell (toolbar icon) to be visible even if collapsed/hidden
            if (shell) {
-             if (isNativeCollapsed) {
-               shell.style.visibility = 'hidden'; // Hide shell, CSS will show icon
+             const isStandby = !ToolbarManager.isToolbarEnabled;
+             if (isNativeCollapsed && !isStandby) {
+               shell.style.visibility = 'hidden'; // Truly hide if collapsed AND enabled (managed by CSS usually)
                shell.classList.add('nb-ext-shell-collapsed');
                shell.style.left = '12px';
                shell.style.width = 'auto';
              } else {
                shell.style.visibility = 'visible';
                shell.classList.remove('nb-ext-shell-collapsed');
+               if (isStandby) {
+                 shell.style.left = '16px'; // Default floating position for standby
+                 shell.style.width = '40px';
+                 shell.style.bottom = '24px'; // Ensure it's at the bottom
+               }
              }
            }
         } else {
-           if (shell) shell.style.visibility = 'hidden';
+           // On non-notebook pages or non-list views, we check if we should still show standby
+           const isNotebook = window.location.href.includes('/notebook/');
+           if (isNotebook && shell) {
+             shell.style.visibility = 'visible';
+             shell.classList.remove('nb-ext-shell-collapsed');
+             shell.style.left = '16px';
+             shell.style.bottom = '24px';
+             shell.style.width = '40px';
+           } else if (shell) {
+             shell.style.visibility = 'hidden';
+           }
         }
       }
     } else {
@@ -82,10 +98,18 @@ var LayoutEngine = {
       const isNativeCollapsed = ViewDetector.isNativeCollapsed();
 
       if (!isMainListView || isNativeCollapsed) {
-        toolbars.forEach(t => t.style.setProperty('display', 'none', 'important'));
+        // Only hide toolbars if we are NOT in a notebook page
+        // If in notebook, we want to at least show the standby button
+        const isNotebook = window.location.href.includes('/notebook/');
+        if (!isNotebook) {
+            toolbars.forEach(t => t.style.setProperty('display', 'none', 'important'));
+        }
+
         if (shell) {
-          shell.style.visibility = 'hidden';
-          shell.classList.add('nb-ext-shell-collapsed');
+          if (!isNotebook) {
+            shell.style.visibility = 'hidden';
+            shell.classList.add('nb-ext-shell-collapsed');
+          }
         }
       }
       if (container) container.style.display = 'none';

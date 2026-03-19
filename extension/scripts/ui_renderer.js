@@ -253,9 +253,10 @@ var UIRenderer = {
     }
     mainContent.appendChild(itemBox);
 
+    const iconInfo = NotebookUtils.getFileIcon(item.name);
     const icon = document.createElement('span');
-    icon.className = 'nb-ext-item-icon material-symbols-outlined';
-    icon.textContent = NotebookUtils.getFileIcon(item.name);
+    icon.className = `nb-ext-item-icon material-symbols-outlined nb-ext-icon-${iconInfo.type}`;
+    icon.textContent = iconInfo.icon;
     mainContent.appendChild(icon);
 
     const label = document.createElement('div');

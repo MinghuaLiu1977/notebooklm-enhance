@@ -4,21 +4,21 @@
 var NotebookUtils = {
   // File extension identification
   getFileIcon(filename) {
-    if (!filename) return 'description';
+    if (!filename) return { icon: 'description', type: 'doc' };
     const ext = filename.split('.').pop().toLowerCase();
     const map = {
-      'pdf': 'picture_as_pdf',
-      'doc': 'article', 'docx': 'article',
-      'xls': 'table_view', 'xlsx': 'table_view', 'csv': 'table_view',
-      'ppt': 'present_to_all', 'pptx': 'present_to_all',
-      'png': 'image', 'jpg': 'image', 'jpeg': 'image', 'gif': 'image', 'webp': 'image',
-      'txt': 'notes', 'md': 'description',
-      'zip': 'folder_zip', 'rar': 'folder_zip', '7z': 'folder_zip',
-      'html': 'html', 'js': 'javascript', 'css': 'css',
-      'mp3': 'audio_file', 'wav': 'audio_file',
-      'mp4': 'video_file', 'mov': 'video_file'
+      'pdf': { icon: 'picture_as_pdf', type: 'pdf' },
+      'doc': { icon: 'article', type: 'doc' }, 'docx': { icon: 'article', type: 'doc' },
+      'xls': { icon: 'table_view', type: 'sheet' }, 'xlsx': { icon: 'table_view', type: 'sheet' }, 'csv': { icon: 'table_view', type: 'sheet' },
+      'ppt': { icon: 'present_to_all', type: 'slide' }, 'pptx': { icon: 'present_to_all', type: 'slide' },
+      'png': { icon: 'image', type: 'image' }, 'jpg': { icon: 'image', type: 'image' }, 'jpeg': { icon: 'image', type: 'image' }, 'gif': { icon: 'image', type: 'image' }, 'webp': { icon: 'image', type: 'image' },
+      'txt': { icon: 'notes', type: 'doc' }, 'md': { icon: 'description', type: 'doc' },
+      'zip': { icon: 'folder_zip', type: 'zip' }, 'rar': { icon: 'folder_zip', type: 'zip' }, '7z': { icon: 'folder_zip', type: 'zip' },
+      'html': { icon: 'html', type: 'code' }, 'js': { icon: 'javascript', type: 'code' }, 'css': { icon: 'css', type: 'code' },
+      'mp3': { icon: 'audio_file', type: 'media' }, 'wav': { icon: 'audio_file', type: 'media' },
+      'mp4': { icon: 'video_file', type: 'media' }, 'mov': { icon: 'video_file', type: 'media' }
     };
-    return map[ext] || 'description';
+    return map[ext] || { icon: 'description', type: 'doc' };
   },
 
   /**

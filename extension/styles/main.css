@@ -483,6 +483,25 @@ body.nb-ext-is-collapsed .nb-ext-item-icon {
   word-break: break-all !important;
 }
 
+/* Colored Icons by File Type */
+.nb-ext-icon-pdf { color: #f44336 !important; }      /* Red */
+.nb-ext-icon-doc { color: #2196f3 !important; }      /* Blue */
+.nb-ext-icon-sheet { color: #4caf50 !important; }    /* Green */
+.nb-ext-icon-slide { color: #ff9800 !important; }    /* Orange */
+.nb-ext-icon-image { color: #9c27b0 !important; }    /* Purple */
+.nb-ext-icon-media { color: #009688 !important; }    /* Teal */
+.nb-ext-icon-zip { color: #795548 !important; }      /* Brown */
+.nb-ext-icon-code { color: #607d8b !important; }     /* Blue Grey */
+
+body.dark-theme .nb-ext-icon-pdf { color: #ee675c !important; }
+body.dark-theme .nb-ext-icon-doc { color: #7baaf7 !important; }
+body.dark-theme .nb-ext-icon-sheet { color: #81c995 !important; }
+body.dark-theme .nb-ext-icon-slide { color: #fcc934 !important; }
+body.dark-theme .nb-ext-icon-image { color: #c58af9 !important; }
+body.dark-theme .nb-ext-icon-media { color: #4db6ac !important; }
+body.dark-theme .nb-ext-icon-zip { color: #a1887f !important; }
+body.dark-theme .nb-ext-icon-code { color: #90a4ae !important; }
+
 /* Action Icons */
 .nb-ext-action-icon {
   margin-left: 8px !important;
@@ -665,35 +684,48 @@ body.nb-ext-is-collapsed .nb-ext-item-icon {
 
 .nb-ext-modal-content {
   background: var(--nb-ext-bg) !important;
-  border: 1px solid var(--nb-ext-border) !important;
-  border-radius: 16px !important;
-  padding: 24px !important;
+  border: 1px solid var(--nb-ext-border-soft) !important;
+  border-radius: 24px !important;
+  padding: 32px !important;
   width: 90% !important;
-  max-width: 400px !important;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3) !important;
+  max-width: 440px !important;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.25) !important;
   display: flex !important;
   flex-direction: column !important;
-  gap: 16px !important;
+  gap: 24px !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+body.dark-theme .nb-ext-modal-content {
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5) !important;
+  background: var(--nb-ext-card-bg) !important;
 }
 
 .nb-ext-modal-title {
-  font-size: 18px !important;
-  font-weight: 600 !important;
+  font-size: 22px !important;
+  font-weight: 500 !important;
   color: var(--nb-ext-text) !important;
+  margin-bottom: 4px !important;
 }
 
 .nb-ext-modal-input {
   width: 100% !important;
-  padding: 10px 12px !important;
-  border: 1px solid var(--nb-ext-border) !important;
-  border-radius: 8px !important;
+  padding: 14px 16px !important;
+  border: 1.5px solid var(--nb-ext-border) !important;
+  border-radius: 12px !important;
   background: var(--nb-ext-input-bg) !important;
   color: var(--nb-ext-text) !important;
   outline: none !important;
+  font-size: 16px !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-sizing: border-box !important;
 }
 
 .nb-ext-modal-input:focus {
   border-color: var(--nb-ext-primary) !important;
+  box-shadow: 0 0 0 3px var(--nb-ext-active-bg) !important;
+  background: var(--nb-ext-bg) !important;
 }
 
 .nb-ext-modal-actions {
@@ -703,26 +735,39 @@ body.nb-ext-is-collapsed .nb-ext-item-icon {
 }
 
 .nb-ext-btn {
-  padding: 8px 16px !important;
-  border-radius: 8px !important;
-  font-size: 14px !important;
+  padding: 10px 24px !important;
+  border-radius: 20px !important;
+  font-size: 15px !important;
   font-weight: 500 !important;
   cursor: pointer !important;
   border: none !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  user-select: none !important;
 }
 
 .nb-ext-btn-primary {
   background: var(--nb-ext-primary) !important;
   color: white !important;
+  box-shadow: 0 2px 8px rgba(26, 115, 232, 0.25) !important;
+}
+
+.nb-ext-btn-primary:hover {
+  background: #1967d2 !important;
+  box-shadow: 0 4px 12px rgba(26, 115, 232, 0.35) !important;
+  transform: translateY(-1px) !important;
+}
+
+.nb-ext-btn-primary:active {
+  transform: translateY(0) !important;
 }
 
 .nb-ext-btn-ghost {
   background: transparent !important;
-  color: var(--nb-ext-text-muted) !important;
+  color: var(--nb-ext-primary) !important;
 }
 
 .nb-ext-btn-ghost:hover {
-  background: var(--nb-ext-hover) !important;
+  background: var(--nb-ext-active-bg) !important;
 }
 
 /* 4.65: Force hiding classes must be at the end to ensure priority over previous rules */

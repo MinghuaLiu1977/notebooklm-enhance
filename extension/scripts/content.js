@@ -14,11 +14,14 @@ var NotebookManager = {
   editingFolderId: null,
   licenseInfo: null,
   isRendering: false,
+  isInitialized: false,
   lastContainerFixTime: 0,
   scanTimer: null,
   sidebarObserver: null,
 
   async init() {
+    if (this.isInitialized) return;
+
     // Check if extension context is valid
     if (typeof chrome === 'undefined' || !chrome.runtime || !chrome.runtime.id) {
       return;
@@ -35,7 +38,7 @@ var NotebookManager = {
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       if (request.action === 'getNotebookConfig') {
         StorageManager.getNotebookConfig(request.notebookId).then(sendResponse);
-        return true; // Keep channel open for async
+        return true; 
       }
       if (request.action === 'saveNotebookConfig') {
         StorageManager.saveNotebookConfig(request.notebookId, request.config);
@@ -43,7 +46,7 @@ var NotebookManager = {
       }
     });
 
-    // 2. Data Migration: One-time migration from Local Extension Storage to Page LocalStorage
+    // 2. Data Migration: One-time migration
     try {
       const migrationFlag = `nb_ext_migrated_${chrome.runtime.id}`;
       if (!localStorage.getItem(migrationFlag)) {
@@ -52,20 +55,13 @@ var NotebookManager = {
         for (const key in localData) {
           if (key.startsWith('notebook_config_')) {
             localStorage.setItem(key, JSON.stringify(localData[key]));
-            console.log(`[NB-Ext] Migrated: ${key}`);
           }
         }
         localStorage.setItem(migrationFlag, 'true');
-        console.log("[NB-Ext] Migration complete.");
       }
-    } catch (e) {
-      console.error("[NB-Ext] Migration failed:", e);
-    }
+    } catch (e) {}
 
-    this.notebookId = StorageManager.extractNotebookId();
-    if (!this.notebookId) return;
-
-    // Font set
+    // 3. Global Styles
     if (!document.getElementById('nb-ext-material-icons')) {
       const link = document.createElement('link');
       link.id = 'nb-ext-material-icons';
@@ -74,44 +70,68 @@ var NotebookManager = {
       document.head.appendChild(link);
     }
 
-    // Safety check to prevent context invalidation leading to undefined chrome.storage.local
-    let settings = { nb_ext_tree_enabled: true, nb_ext_display_mode: 'single', nb_ext_collapsed_ids: [] };
-    if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-      settings = await chrome.storage.local.get(['nb_ext_tree_enabled', 'nb_ext_display_mode', 'nb_ext_collapsed_ids']);
-    }
-
-    this.treeViewEnabled = settings.nb_ext_tree_enabled ?? true;
-    this.displayMode = settings.nb_ext_display_mode ?? 'single';
-    this.collapsedFolderIds = settings.nb_ext_collapsed_ids ?? [];
-
     document.body.classList.add('nb-ext-deep-mode');
 
-    // Lifecycle monitoring
+    // 4. Lifecycle monitoring
     this.observer = new MutationObserver(() => {
       if (this.scanTimer) clearTimeout(this.scanTimer);
       this.scanTimer = setTimeout(() => this.scanDom(), 500);
     });
     this.observer.observe(document.body, { childList: true, subtree: true });
-    
-    // URL fallback enhancement
-    this.refreshData();
 
-    // Minimal timed synchronization (once per second)
+    // 5. Shared background sync
     setInterval(() => {
-      LayoutEngine.syncContainerSize(this);
-      ToolbarManager.updatePosition(this);
+      if (this.notebookId) {
+        LayoutEngine.syncContainerSize(this);
+        ToolbarManager.updatePosition(this);
+      }
     }, 1000);
 
-    // Global click capture - ensures sync whenever the header area is clicked, regardless of DOM changes
+    // 6. Global click capture
     document.addEventListener('click', (e) => {
+      if (!this.notebookId) return;
       const header = e.target.closest('.source-panel-header') || e.target.closest('[role="row"]');
       if (header && (e.target.closest('mat-checkbox') || e.target.closest('input[type="checkbox"]'))) {
-        console.log("[NB-Ext] Global Capture: Native Select Area clicked");
         this.scheduleRefresh([100, 300, 1000]);
       }
-      // Immediate toolbar position update on any click to catch toggle actions
       setTimeout(() => ToolbarManager.updatePosition(this), 50);
     }, true);
+
+    this.isInitialized = true;
+    console.log("[NB-Ext] Global services initialized.");
+
+    // 7. Initial Notebook detection
+    this.notebookId = StorageManager.extractNotebookId();
+    if (this.notebookId) {
+      // Safety check to prevent context invalidation leading to undefined chrome.storage.local
+      let settings = { nb_ext_tree_enabled: true, nb_ext_display_mode: 'single', nb_ext_collapsed_ids: [] };
+      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+        settings = await chrome.storage.local.get(['nb_ext_tree_enabled', 'nb_ext_display_mode', 'nb_ext_collapsed_ids']);
+      }
+      this.treeViewEnabled = settings.nb_ext_tree_enabled ?? true;
+      this.displayMode = settings.nb_ext_display_mode ?? 'single';
+      this.collapsedFolderIds = settings.nb_ext_collapsed_ids ?? [];
+      
+      this.refreshData();
+    }
+  },
+
+  async handleNotebookSwitch(newId) {
+    if (!newId || newId === this.notebookId) return;
+    
+    console.log(`[NB-Ext] Switching context to: ${newId}`);
+    this.notebookId = newId;
+    this.sources = [];
+    this.notes = [];
+    
+    if (!this.isInitialized) {
+      await this.init();
+    } else {
+      // Clear current UI state to prevent flicker or residue
+      const container = document.getElementById('nb-ext-container');
+      if (container) container.textContent = '';
+      this.refreshData(true);
+    }
   },
 
   async checkLicense() {
@@ -339,5 +359,15 @@ var NotebookManager = {
     return false;
   }
 };
+
+// URL Monitoring: Detect notebook context change without full reload
+let lastUrlNotebookId = StorageManager.extractNotebookId();
+setInterval(() => {
+  const currentId = StorageManager.extractNotebookId();
+  if (currentId && currentId !== lastUrlNotebookId) {
+    NotebookManager.handleNotebookSwitch(currentId);
+  }
+  lastUrlNotebookId = currentId;
+}, 1000);
 
 setTimeout(() => NotebookManager.init(), 2000);

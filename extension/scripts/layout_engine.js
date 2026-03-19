@@ -60,36 +60,38 @@ var LayoutEngine = {
         scrollArea.style.visibility = 'visible';
 
         if (isMainListView) {
-           // Allow shell (toolbar icon) to be visible even if collapsed/hidden
-           if (shell) {
-             const isStandby = !ToolbarManager.isToolbarEnabled;
-             if (isNativeCollapsed && !isStandby) {
-               shell.style.visibility = 'hidden'; // Truly hide if collapsed AND enabled (managed by CSS usually)
-               shell.classList.add('nb-ext-shell-collapsed');
-               shell.style.left = '12px';
-               shell.style.width = 'auto';
-             } else {
-               shell.style.visibility = 'visible';
-               shell.classList.remove('nb-ext-shell-collapsed');
-               if (isStandby) {
-                 shell.style.left = '16px'; // Default floating position for standby
-                 shell.style.width = '40px';
-                 shell.style.bottom = '24px'; // Ensure it's at the bottom
-               }
-             }
-           }
-        } else {
-           // On non-notebook pages or non-list views, we check if we should still show standby
-           const isNotebook = window.location.href.includes('/notebook/');
-           if (isNotebook && shell) {
+         // Allow shell (toolbar icon) to be visible even if collapsed/hidden
+         if (shell) {
+           const isStandby = !ToolbarManager.isToolbarEnabled;
+           
+           // If collapsed, we hide the shell regardless of standby status to avoid "white circle" ghosting
+           if (isNativeCollapsed) {
+             shell.style.visibility = 'hidden';
+             shell.classList.add('nb-ext-shell-collapsed');
+           } else {
              shell.style.visibility = 'visible';
              shell.classList.remove('nb-ext-shell-collapsed');
-             shell.style.left = '16px';
-             shell.style.bottom = '24px';
-             shell.style.width = '40px';
-           } else if (shell) {
-             shell.style.visibility = 'hidden';
+             if (isStandby) {
+               shell.style.left = '16px'; 
+               shell.style.width = '40px';
+               shell.style.bottom = '24px';
+             }
            }
+         }
+      } else {
+         // On non-notebook pages or non-list views, we check if we should still show standby
+         const isNotebook = window.location.href.includes('/notebook/');
+         // Only show standby in notebook pages IF the panel is not collapsed
+         if (isNotebook && shell && !isNativeCollapsed) {
+           shell.style.visibility = 'visible';
+           shell.classList.remove('nb-ext-shell-collapsed');
+           shell.style.left = '16px';
+           shell.style.bottom = '24px';
+           shell.style.width = '40px';
+         } else if (shell) {
+           shell.style.visibility = 'hidden';
+           shell.classList.add('nb-ext-shell-collapsed');
+         }
         }
       }
     } else {

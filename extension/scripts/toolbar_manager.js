@@ -50,7 +50,7 @@ var ToolbarManager = {
     const isNotebook = window.location.href.includes('/notebook/');
     const isMini = !this.isSourcePanelVisible || !this.isToolbarEnabled || !this.isToolbarExpanded;
 
-    if (this.isSourcePanelVisible || (isNotebook && isMini)) {
+    if (this.isSourcePanelVisible || (isNotebook && isMini && !isCollapsed)) {
       if (toolbar) toolbar.style.display = 'flex';
       const shell = document.querySelector('.nb-ext-floating-shell');
       if (shell) {

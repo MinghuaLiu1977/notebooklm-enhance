@@ -100,29 +100,41 @@ var LayoutEngine = {
          }
         }
       }
-    } else {
-      // Recovery or Unsupported View
-      const isMainListView = ViewDetector.isMainListView(manager);
-      const isNativeCollapsed = ViewDetector.isNativeCollapsed();
+      } else {
+        // Recovery or Unsupported View
+        const isMainListView = ViewDetector.isMainListView(manager);
+        const isNativeCollapsed = ViewDetector.isNativeCollapsed();
+        const isDocumentView = ViewDetector.isDocumentView();
 
-      if (!isMainListView || isNativeCollapsed) {
-        // Only hide toolbars if we are NOT in a notebook page
-        // If in notebook, we want to at least show the standby button
-        const isNotebook = window.location.href.includes('/notebook/');
-        if (!isNotebook) {
-            toolbars.forEach(t => t.style.setProperty('display', 'none', 'important'));
-        }
+        if (!isMainListView || isNativeCollapsed || isDocumentView) {
+          // Only hide toolbars if we are NOT in a notebook page
+          // If in notebook, we want to at least show the standby button
+          const isNotebook = window.location.href.includes('/notebook/');
+          
+          if (shell) {
+            // Hide shell if sidebar is collapsed, or if we are in document view
+            if (!isNotebook || isNativeCollapsed || isDocumentView) {
+              shell.style.visibility = 'hidden';
+              shell.classList.add('nb-ext-shell-collapsed');
+            } else {
+              // Show standby (mini) only if not collapsed/document view
+              shell.style.visibility = 'visible';
+              shell.classList.remove('nb-ext-shell-collapsed');
+              shell.classList.add('nb-ext-shell-mini');
+              shell.style.left = '16px';
+              shell.style.bottom = '24px';
+              shell.style.width = '40px';
+            }
+          }
 
-        if (shell) {
           if (!isNotebook) {
-            shell.style.visibility = 'hidden';
-            shell.classList.add('nb-ext-shell-collapsed');
+            toolbars.forEach(t => t.style.setProperty('display', 'none', 'important'));
           }
         }
+        if (container) container.style.display = 'none';
+        if (scrollArea) scrollArea.style.visibility = 'visible';
       }
-      if (container) container.style.display = 'none';
-      if (scrollArea) scrollArea.style.visibility = 'visible';
-    }
+
   },
 
   initSidebarObserver(manager, target) {

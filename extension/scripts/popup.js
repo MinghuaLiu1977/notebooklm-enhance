@@ -140,6 +140,27 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
             }
+
+            // ================= 新增：Gemini API Key 保存逻辑 ================= //
+            const geminiInput = document.getElementById('gemini-api-key');
+            const saveGeminiBtn = document.getElementById('save-gemini-btn');
+            const geminiStatus = document.getElementById('gemini-status');
+            
+            if (geminiInput && saveGeminiBtn) {
+                chrome.storage.local.get(['geminiApiKey'], (result) => {
+                    if (result.geminiApiKey) geminiInput.value = result.geminiApiKey;
+                });
+
+                saveGeminiBtn.addEventListener('click', () => {
+                    const key = geminiInput.value.trim();
+                    chrome.storage.local.set({ geminiApiKey: key }, () => {
+                        geminiStatus.textContent = 'API Key Saved Successfully!';
+                        setTimeout(() => geminiStatus.textContent = '', 2000);
+                    });
+                });
+            }
+            // ============================================================= //
+
         } catch (e) {
             console.error("[NB-Ext] Popup Init Failed:", e);
         }

@@ -74,7 +74,7 @@ var NotebookManager = {
     // 4. Lifecycle monitoring
     this.observer = new MutationObserver(() => {
       if (this.scanTimer) clearTimeout(this.scanTimer);
-      this.scanTimer = setTimeout(() => this.scanDom(), 500);
+      this.scanTimer = setTimeout(() => this.refreshData(), 500);
     });
     this.observer.observe(document.body, { childList: true, subtree: true });
 

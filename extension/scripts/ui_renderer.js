@@ -391,6 +391,10 @@ var UIRenderer = {
       this.handleFileAction(manager, item, 'Delete');
     }));
 
+    // ====== 新增：AI重绘/幻灯片功能（已移除） ====== //
+    // ================================ //
+
+
     // Divider
     const hr = document.createElement('div');
     hr.style.height = '1px';
@@ -639,6 +643,67 @@ var UIRenderer = {
         if (await manager.verifyLicense(key)) location.reload();
         else { errorDivEl.textContent = 'Invalid key.'; errorDivEl.style.display = 'block'; activateBtn.disabled = false; activateBtn.textContent = 'Activate Access'; }
       } catch { errorDivEl.textContent = 'Error.'; errorDivEl.style.display = 'block'; activateBtn.disabled = false; activateBtn.textContent = 'Activate Access'; }
+    });
+  },
+
+  /**
+   * 渲染现代化确认模态框 (Promise 封装)
+   */
+  showConfirm(titleText, messageHtml) {
+    return new Promise((resolve) => {
+      const overlay = document.createElement('div');
+      overlay.className = 'nb-ext-modal-overlay';
+      overlay.style.zIndex = '1000200'; // 确保在所有 UI 之上
+
+      const content = document.createElement('div');
+      content.className = 'nb-ext-modal-content';
+      content.style.animation = 'nb-ext-fade-in-bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+
+      const title = document.createElement('div');
+      title.className = 'nb-ext-modal-title';
+      title.style.display = 'flex';
+      title.style.alignItems = 'center';
+      title.style.gap = '12px';
+      title.innerHTML = `<span class="material-symbols-outlined" style="color:var(--nb-ext-primary); font-size:28px;">auto_fix_high</span> ${titleText}`;
+
+      const desc = document.createElement('div');
+      desc.style.lineHeight = '1.6';
+      desc.style.fontSize = '15px';
+      desc.style.color = 'var(--nb-ext-text-soft)';
+      desc.innerHTML = messageHtml.replace(/\n/g, '<br>');
+
+      const actions = document.createElement('div');
+      actions.className = 'nb-ext-modal-actions';
+      actions.style.marginTop = '8px';
+
+      const cancelBtn = document.createElement('button');
+      cancelBtn.className = 'nb-ext-btn nb-ext-btn-ghost';
+      cancelBtn.textContent = '取消';
+      cancelBtn.addEventListener('click', () => {
+        overlay.remove();
+        resolve(false);
+      });
+
+      const okBtn = document.createElement('button');
+      okBtn.className = 'nb-ext-btn nb-ext-btn-primary';
+      okBtn.textContent = '开始去字导出';
+      okBtn.addEventListener('click', () => {
+        overlay.remove();
+        resolve(true);
+      });
+
+      actions.append(cancelBtn, okBtn);
+      content.append(title, desc, actions);
+      overlay.appendChild(content);
+      document.body.appendChild(overlay);
+
+      // 点击背景关闭
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+          overlay.remove();
+          resolve(false);
+        }
+      });
     });
   }
 };

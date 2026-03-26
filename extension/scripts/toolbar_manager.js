@@ -49,9 +49,24 @@ var ToolbarManager = {
 
     const isNotebook = window.location.href.includes('/notebook/');
     const isMini = !this.isSourcePanelVisible || !this.isToolbarEnabled || !this.isToolbarExpanded;
+    const isDocumentView = ViewDetector.isDocumentView();
 
-    if (this.isSourcePanelVisible || (isNotebook && isMini && !isCollapsed)) {
-      if (toolbar) toolbar.style.display = 'flex';
+    if (isDocumentView) {
+      if (toolbar) {
+          toolbar.style.visibility = 'hidden';
+          toolbar.style.pointerEvents = 'none';
+      }
+      const shell = document.querySelector('.nb-ext-floating-shell');
+      if (shell) {
+        shell.style.visibility = 'hidden';
+        shell.classList.add('nb-ext-shell-collapsed');
+      }
+    } else if (this.isSourcePanelVisible || (isNotebook && isMini && !isCollapsed)) {
+      if (toolbar) {
+          toolbar.style.display = 'flex';
+          toolbar.style.visibility = 'visible';
+          toolbar.style.pointerEvents = 'auto';
+      }
       const shell = document.querySelector('.nb-ext-floating-shell');
       if (shell) {
         shell.style.visibility = 'visible';
@@ -68,13 +83,17 @@ var ToolbarManager = {
         }
       }
     } else {
-      if (toolbar) toolbar.style.display = 'none';
+      if (toolbar) {
+          toolbar.style.visibility = 'hidden';
+          toolbar.style.pointerEvents = 'none';
+      }
       const shell = document.querySelector('.nb-ext-floating-shell');
       if (shell) {
         shell.style.visibility = 'hidden';
         shell.classList.add('nb-ext-shell-collapsed');
       }
     }
+
     
     this.refreshToolbarStatus(manager);
   },

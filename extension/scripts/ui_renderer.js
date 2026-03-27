@@ -222,7 +222,7 @@ var UIRenderer = {
     unassignedDiv.className = 'nb-ext-unassigned';
     const unassignedTitle = document.createElement('div');
     unassignedTitle.className = 'nb-ext-unassigned-title';
-    unassignedTitle.textContent = `Unassigned (${unassignedItems.length})`;
+    unassignedTitle.textContent = `/ (${unassignedItems.length})`;
     unassignedDiv.appendChild(unassignedTitle);
     unassignedItems.forEach(item => unassignedDiv.appendChild(this.createItemRow(manager, item)));
     container.appendChild(unassignedDiv);
@@ -411,9 +411,9 @@ var UIRenderer = {
 
     const config = await StorageManager.getNotebookConfig(manager.notebookId);
 
-    // Unassigned Option
+    // / Option
     const isUnassigned = !config.folders.some(f => f.itemIds.includes(item.id));
-    menu.appendChild(this.createMenuItem('Unassigned', isUnassigned ? 'check' : '', () => {
+    menu.appendChild(this.createMenuItem('/', isUnassigned ? 'check' : '', () => {
       manager.moveItemToFolder(item.id, '');
       menu.remove();
     }));

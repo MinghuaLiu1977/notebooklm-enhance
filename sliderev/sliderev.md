@@ -44,7 +44,7 @@ SlideRev is designed for speed. Transform your AI citations in seconds:
 
 ---
 
-## 🛡️ Privacy Policy
+## Privacy Policy
 
 SlideRev is built with a "Privacy First" philosophy.
 
@@ -54,7 +54,7 @@ SlideRev is built with a "Privacy First" philosophy.
 
 ---
 
-## 🛠️ Support
+## Support
 
 We are dedicated to providing the best experience for the AI-augmented workforce.
 

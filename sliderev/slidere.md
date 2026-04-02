@@ -12,9 +12,9 @@ Are you using **NotebookLM** or other AI tools to generate insightful slides and
 ![SlideRev Hero](editablepptx.png)
 ---
 
-## Key System Features
+## 🔥 Key System Features
 
-🔥 ### 1. AI-Powered Vision OCR
+### 1. AI-Powered Vision OCR
 
 Don't just extract text—reconstruct it. SlideRev identifies not only the characters but also their **exact position, font size, and color**. It performs a "one-to-one" replacement, turning blurry pixels into crisp, editable text layers.
 
@@ -34,9 +34,9 @@ Your documents never leave your Mac. All AI inference and PDF processing happen 
 
 ---
 
-## User Guide: 3 Steps to Perfection
+## 📖 User Guide: 3 Steps to Perfection
 
-📖 SlideRev is designed for speed. Transform your AI citations in seconds:
+SlideRev is designed for speed. Transform your AI citations in seconds:
 
 1. **Import**: Drag and drop your NotebookLM PDF, screenshot, or infographic into the SlideRev dashboard.
 2. **Refine**: Click the **"Refine"** button. SlideRev will automatically identify text blocks and background watermarks. You can even use the **Eraser Tool** for manual pixel-perfect touch-ups.
@@ -46,9 +46,9 @@ Your documents never leave your Mac. All AI inference and PDF processing happen 
 
 ---
 
-## Privacy Policy
+## 🛡️ Privacy Policy
 
-🛡️ SlideRev is built with a "Privacy First" philosophy.
+SlideRev is built with a "Privacy First" philosophy.
 
 - **Offline Processing**: We do not use any cloud-based API for OCR or Inpainting. Everything is powered by CoreML on your local CPU/GPU.
 - **No Data Collection**: We do not collect, store, or transmit any part of your uploaded documents or the text extracted from them.
@@ -56,11 +56,11 @@ Your documents never leave your Mac. All AI inference and PDF processing happen 
 
 ---
 
-## Support
+## 🛠️ Support
 
-🛠️ We are dedicated to providing the best experience for the AI-augmented workforce.
+We are dedicated to providing the best experience for the AI-augmented workforce.
 
-- **Found a Bug?** Please contact our support team at <email>[support@eastlakestudio.com](mailto:support@eastlakestudio.com).
+- **Found a Bug?** Please contact our support team at [support email](mailto:support@eastlakestudio.com).
 - **Feature Requests**: We love hearing from NotebookLM power users! Let us know how we can make your workflow smoother.
 - **Updates**: SlideRev is frequently updated with improved AI models and export features.
 

@@ -19,17 +19,6 @@ var UIRenderer = {
       }
 
       let container = document.getElementById('nb-ext-container');
-      if (manager.licenseInfo?.isExpired) {
-        console.log("[NB-Ext] renderSidebarUI: License expired, showing paywall");
-        if (!container) {
-          container = document.createElement('div');
-          container.id = 'nb-ext-container';
-          container.className = 'nb-ext-sidebar nb-ext-full-width';
-          sidebarContent.appendChild(container);
-        }
-        this.renderPaywall(manager, false, true);
-        return;
-      }
 
       if (!container) {
         console.log("[NB-Ext] renderSidebarUI: Creating container");
@@ -567,84 +556,6 @@ var UIRenderer = {
     }
   },
 
-  renderPaywall(manager, isManualOpen = false, isInline = false) {
-    const paywallId = isInline ? 'nb-ext-paywall-inline' : 'nb-ext-paywall';
-    let paywall = document.getElementById(paywallId);
-    if (!paywall) {
-      paywall = document.createElement('div');
-      paywall.id = paywallId;
-      paywall.className = paywallId;
-      const host = isInline ? document.getElementById('nb-ext-container') : document.body;
-      host?.appendChild(paywall);
-    }
-
-    if (!isInline && isManualOpen && !manager.licenseInfo.isExpired) {
-      paywall.addEventListener('click', (e) => { if (e.target === paywall) paywall.remove(); });
-    }
-
-    const trialDaysLeft = Math.max(0, manager.licenseInfo.trialDays - Math.floor((Date.now() - manager.licenseInfo.installDate) / 86400000));
-    paywall.textContent = '';
-    const modal = document.createElement('div');
-    modal.className = 'nb-ext-paywall-modal';
-
-    if (!isInline && isManualOpen) {
-      const closeBtn = document.createElement('span');
-      closeBtn.className = 'material-symbols-outlined';
-      closeBtn.style.cssText = 'position:absolute; top:16px; right:16px; cursor:pointer;';
-      closeBtn.textContent = 'close';
-      closeBtn.addEventListener('click', () => paywall.remove());
-      modal.appendChild(closeBtn);
-    }
-
-    const icon = document.createElement('span');
-    icon.className = 'material-symbols-outlined nb-ext-paywall-icon';
-    icon.textContent = manager.licenseInfo.isExpired ? 'lock' : 'verified_user';
-
-    const title = document.createElement('div');
-    title.className = 'nb-ext-paywall-title';
-    title.textContent = manager.licenseInfo.isExpired ? 'Trial Expired' : 'Enhancer License';
-
-    const desc = document.createElement('div');
-    desc.className = 'nb-ext-paywall-desc';
-    desc.textContent = manager.licenseInfo.isExpired ? 'Trial ended. Buy a license to continue.' : trialDaysLeft + ' days left.';
-
-    const inputGroup = document.createElement('div');
-    inputGroup.className = 'nb-ext-license-input-group';
-
-    const inputEl = document.createElement('input');
-    inputEl.type = 'text';
-    inputEl.className = 'nb-ext-license-input';
-    inputEl.placeholder = 'License Key...';
-
-    const activateBtn = document.createElement('button');
-    activateBtn.className = 'nb-ext-activate-btn';
-    activateBtn.textContent = 'Activate Access';
-
-    const errorDivEl = document.createElement('div');
-    errorDivEl.className = 'nb-ext-license-error';
-    errorDivEl.style.display = 'none';
-
-    inputGroup.append(inputEl, activateBtn, errorDivEl);
-
-    const buyLink = document.createElement('a');
-    buyLink.href = 'https://gumroad.com/l/cxzucm';
-    buyLink.target = '_blank';
-    buyLink.className = 'nb-ext-buy-link';
-    buyLink.textContent = 'Buy Key on Gumroad';
-
-    modal.append(icon, title, desc, inputGroup, buyLink);
-    paywall.appendChild(modal);
-
-    activateBtn.addEventListener('click', async () => {
-      const key = inputEl.value.trim();
-      if (!key) return;
-      activateBtn.disabled = true; activateBtn.textContent = 'Verifying...';
-      try {
-        if (await manager.verifyLicense(key)) location.reload();
-        else { errorDivEl.textContent = 'Invalid key.'; errorDivEl.style.display = 'block'; activateBtn.disabled = false; activateBtn.textContent = 'Activate Access'; }
-      } catch { errorDivEl.textContent = 'Error.'; errorDivEl.style.display = 'block'; activateBtn.disabled = false; activateBtn.textContent = 'Activate Access'; }
-    });
-  },
 
   /**
    * 渲染现代化确认模态框 (Promise 封装)

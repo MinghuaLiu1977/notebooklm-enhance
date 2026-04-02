@@ -61,36 +61,23 @@ var StorageManager = {
   },
 
   async getLicenseInfo() {
-    if (!this.isContextValid()) return { installDate: Date.now(), licenseKey: null, isLicensed: false, trialDays: 7 };
-    try {
-      // Use chrome.storage.sync for settings
-      const data = await chrome.storage.sync.get(['nb_ext_install_date', 'nb_ext_license_key', 'nb_ext_is_licensed']);
-      
-      if (!data.nb_ext_install_date) {
-        const now = Date.now();
-        await chrome.storage.sync.set({ 'nb_ext_install_date': now });
-        return { installDate: now, licenseKey: null, isLicensed: false, trialDays: 7 };
-      }
-      
-      return {
-        installDate: data.nb_ext_install_date,
-        licenseKey: data.nb_ext_license_key || null,
-        isLicensed: !!data.nb_ext_is_licensed,
-        trialDays: 7
-      };
-    } catch (e) {
-      return { installDate: Date.now(), licenseKey: null, isLicensed: false, trialDays: 7 };
-    }
+    // Permanently Free: Return licensed status for all users
+    return { 
+      installDate: Date.now(), 
+      licenseKey: 'FREE-PERMANENT', 
+      isLicensed: true, 
+      trialDays: 9999 
+    };
   },
 
   async setLicense(key, isLicensed) {
-    if (!this.isContextValid()) return;
-    try {
+    // No longer needed but kept for compatibility
+    if (this.isContextValid()) {
       await chrome.storage.sync.set({ 
-        'nb_ext_license_key': key,
+        'nb_ext_license_key': key, 
         'nb_ext_is_licensed': isLicensed 
       });
-    } catch (e) {}
+    }
   },
 
   async getEnabledState() {

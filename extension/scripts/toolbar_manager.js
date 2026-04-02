@@ -167,10 +167,6 @@ var ToolbarManager = {
 
       toolbar.append(searchBtn, viewBtn, modeBtn, addDirBtn);
 
-      if (manager.licenseInfo && !manager.licenseInfo.isLicensed) {
-        toolbar.appendChild(this.createButton('vpn_key', '激活 (Activate)', () => UIRenderer.renderPaywall(manager, true)));
-      }
-
       const spacer = document.createElement('div');
       spacer.style.width = '4px';
       toolbar.appendChild(spacer);

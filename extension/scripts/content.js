@@ -135,8 +135,7 @@ var NotebookManager = {
 
   async checkLicense() {
     this.licenseInfo = await StorageManager.getLicenseInfo();
-    const trialPeriod = this.licenseInfo.trialDays * 86400000;
-    this.licenseInfo.isExpired = !this.licenseInfo.isLicensed && (Date.now() - this.licenseInfo.installDate > trialPeriod);
+    this.licenseInfo.isExpired = false;
     return this.licenseInfo;
   },
 
@@ -334,23 +333,6 @@ var NotebookManager = {
   getGlobalSelectionState() {
     return this.getSelectionState(this.sources.map(s => s.id));
   },
-
-  async verifyLicense(key) {
-    const params = new URLSearchParams({ product_id: '9KnEA4Z1DE6BlSSJRqONvg==', license_key: key });
-    try {
-      const response = await fetch('https://api.gumroad.com/v2/licenses/verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: params.toString()
-      });
-      const data = await response.json();
-      if (data.success && !data.uses_limit_reached) {
-        await StorageManager.setLicense(key, true);
-        return true;
-      }
-    } catch {}
-    return false;
-  }
 };
 
 // URL Monitoring: Detect notebook context change without full reload

@@ -190,9 +190,47 @@ p {
   color: #9aa0a6;
 }
 
+.sliderev-promo {
+  border: 1px solid #e8f0fe;
+  background: linear-gradient(145deg, #ffffff 0%, #f0f7ff 100%);
+}
+
+.promo-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.promo-icon {
+  color: #1a73e8;
+  font-size: 24px;
+}
+
+.promo-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #1a73e8;
+}
+
+.promo-desc {
+  font-size: 0.8rem;
+  color: #5f6368;
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+.promo-status {
+  text-align: right;
+}
+
 @media (prefers-color-scheme: dark) {
   body { background-color: #202124; color: #e8eaed; }
   .section { background: #2d2e31; }
   #license-input { background: #202124; border-color: #5f6368; color: white; }
   p { color: #9aa0a6; }
+  .sliderev-promo {
+    border-color: #1a73e833;
+    background: linear-gradient(145deg, #2d2e31 0%, #1a73e811 100%);
+  }
 }

@@ -220,8 +220,36 @@ p {
   line-height: 1.5;
 }
 
-.promo-status {
-  text-align: right;
+.promo-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.download-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: linear-gradient(135deg, #1a73e8 0%, #174ea6 100%);
+  color: white !important;
+  text-decoration: none !important;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(26, 115, 232, 0.2);
+}
+
+.download-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(26, 115, 232, 0.3);
+  background: linear-gradient(135deg, #174ea6 0%, #1a73e8 100%);
+}
+
+.download-btn .material-symbols-outlined {
+  font-size: 18px;
 }
 
 @media (prefers-color-scheme: dark) {

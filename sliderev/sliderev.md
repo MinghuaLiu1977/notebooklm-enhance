@@ -12,6 +12,12 @@ Are you using **NotebookLM** or other AI tools to generate insightful slides and
 ![SlideRev Hero](editablepptx.png)
 ---
 
+### 🚀 Get SlideRev Now
+
+[**Download on the Mac App Store**](https://apps.apple.com/us/app/slide-rev/id6761469500)
+
+---
+
 ## Key System Features
 
 🔥 ### 1. AI-Powered Vision OCR

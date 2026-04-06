@@ -139,6 +139,12 @@ var NotebookManager = {
       // Clear current UI state to prevent flicker or residue
       const container = document.getElementById('nb-ext-container');
       if (container) container.textContent = '';
+      
+      // Reset search state on notebook switch
+      if (typeof ToolbarManager !== 'undefined') {
+        ToolbarManager.closeSearchPanel(this);
+      }
+      
       this.refreshData(true);
     }
   },

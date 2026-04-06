@@ -9,4 +9,5 @@
 ### 🐛 Bug Fixes
 * **Toolbar State Persistence**: Fixed a bug where the customized toolbar preferences (such as collapsed state and view modes) would reset unexpectedly after restarting the browser. Your settings are now properly remembered.
 * **Improved Responsiveness**: Resolved CSS scaling issues on the showcase page ensuring screenshots remain perfectly proportioned across all window sizes.
+* **Search Reset on Switch**: Fixed a regression where search filters and the search panel would persist when switching between different notebooks.
 * **Increased UI Reliability**: Re-engineered core interaction scripts to fully comply with Chrome's strictest Content Security Policy (CSP), eliminating random unresponsiveness during clicks.

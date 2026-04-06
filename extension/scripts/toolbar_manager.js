@@ -235,12 +235,27 @@ var ToolbarManager = {
     return btn;
   },
 
+  closeSearchPanel(manager) {
+    manager.isSearchOpen = false;
+    const panel = document.getElementById('nb-ext-search-panel');
+    panel?.remove();
+    if (manager.sidebarObserver) {
+      manager.sidebarObserver.disconnect();
+      manager.sidebarObserver = null;
+    }
+    manager.searchQuery = '';
+    UIRenderer.applyFilter(manager);
+    this.refreshToolbarStatus(manager);
+  },
+
   toggleSearchPanel(manager) {
-    manager.isSearchOpen = !manager.isSearchOpen;
-    console.log(`[NB-Ext] SearchPanel: status=${manager.isSearchOpen}`);
-    let panel = document.getElementById('nb-ext-search-panel');
+    const currentlyOpen = manager.isSearchOpen;
     
-    if (manager.isSearchOpen) {
+    if (currentlyOpen) {
+      this.closeSearchPanel(manager);
+    } else {
+      manager.isSearchOpen = true;
+      let panel = document.getElementById('nb-ext-search-panel');
       if (!panel) {
         panel = document.createElement('div');
         panel.id = 'nb-ext-search-panel';
@@ -270,7 +285,7 @@ var ToolbarManager = {
       const closeIcon = document.createElement('span');
       closeIcon.className = 'material-symbols-outlined search-close-icon';
       closeIcon.textContent = 'close';
-      closeIcon.addEventListener('click', () => this.toggleSearchPanel(manager));
+      closeIcon.addEventListener('click', () => this.closeSearchPanel(manager));
 
       box.append(hintIcon, input, closeIcon);
 
@@ -284,7 +299,6 @@ var ToolbarManager = {
       setTimeout(() => {
         if (inputEl) {
           inputEl.focus();
-          console.log("[NB-Ext] Search input focused");
         }
       }, 100);
       
@@ -301,18 +315,11 @@ var ToolbarManager = {
         } 
       });
       inputEl.addEventListener('keydown', (e) => { 
-        if (e.key === 'Escape') this.toggleSearchPanel(manager); 
+        if (e.key === 'Escape') this.closeSearchPanel(manager); 
       });
-    } else {
-      panel?.remove();
-      if (manager.sidebarObserver) {
-        manager.sidebarObserver.disconnect();
-        manager.sidebarObserver = null;
-      }
-      manager.searchQuery = '';
-      UIRenderer.applyFilter(manager);
+
+      this.refreshToolbarStatus(manager);
     }
-    this.refreshToolbarStatus(manager);
   },
 
   refreshToolbarStatus(manager) {

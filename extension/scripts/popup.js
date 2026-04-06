@@ -12,6 +12,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const isEnabled = await StorageManager.getEnabledState();
             enabledToggle.checked = isEnabled;
 
+            // Sync version number
+            const versionEl = document.getElementById('ext-version');
+            if (versionEl) {
+                versionEl.textContent = `v${chrome.runtime.getManifest().version} (Free)`;
+            }
+
             enabledToggle.addEventListener('change', async () => {
                 const newState = enabledToggle.checked;
                 await StorageManager.setEnabledState(newState);
@@ -46,6 +52,42 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
             }
+
+            // SlideRev Promotion Handling
+            const learnMoreBtn = document.getElementById('learn-more-btn');
+            if (learnMoreBtn) {
+                learnMoreBtn.addEventListener('click', () => {
+                    chrome.tabs.create({ url: 'sliderev.html' });
+                });
+            }
+
+            // Dynamic App Store Status Check
+            const checkAppStatus = async () => {
+                const url = 'https://apps.apple.com/us/app/slide-rev/id6761469500';
+                const promoStatusDot = document.getElementById('promo-status-dot');
+                const promoBtn = document.getElementById('promo-btn');
+                const promoBtnText = document.getElementById('promo-btn-text');
+
+                if (!promoBtn) return;
+
+                try {
+                    const response = await fetch(url, { method: 'HEAD', cache: 'no-cache' });
+                    
+                    if (response.status === 200) {
+                        if (promoStatusDot) {
+                            promoStatusDot.className = 'status-dot-live';
+                        }
+                        if (promoBtnText) {
+                            promoBtnText.textContent = 'Get App';
+                        }
+                        promoBtn.classList.remove('disabled');
+                    }
+                } catch (err) {
+                    console.log("[NB-Ext] App status check skipped/failed");
+                }
+            };
+            checkAppStatus();
+
         } catch (e) {
             console.error("[NB-Ext] Popup Init Failed:", e);
         }

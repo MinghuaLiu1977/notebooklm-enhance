@@ -105,6 +105,7 @@ input:checked + .slider:before {
 .status-trial { background: #e8f0fe; color: #1a73e8; }
 .status-expired { background: #fce8e6; color: #d93025; }
 .status-licensed { background: #e6f4ea; color: #1e8e3e; }
+.status-pending { background: #fee7cf; color: #af5b00; }
 
 p {
   font-size: 0.85rem;
@@ -220,36 +221,76 @@ p {
   line-height: 1.5;
 }
 
-.promo-actions {
+.promo-actions-group {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 8px;
+  gap: 8px;
+  margin-top: 12px;
 }
 
-.download-btn {
+.promo-btn-secondary, .promo-btn-primary {
+  flex: 1;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  padding: 8px 14px;
-  background: linear-gradient(135deg, #1a73e8 0%, #174ea6 100%);
-  color: white !important;
-  text-decoration: none !important;
-  border-radius: 20px;
-  font-size: 0.8rem;
+  padding: 8px 4px;
+  font-size: 0.75rem;
   font-weight: 600;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(26, 115, 232, 0.2);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  text-decoration: none !important;
 }
 
-.download-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(26, 115, 232, 0.3);
-  background: linear-gradient(135deg, #174ea6 0%, #1a73e8 100%);
+.promo-btn-secondary {
+  background-color: #f1f3f4;
+  color: #3c4043;
+  border: 1px solid #dadce0;
 }
 
-.download-btn .material-symbols-outlined {
-  font-size: 18px;
+.promo-btn-secondary:hover {
+  background-color: #e8eaed;
+}
+
+.promo-btn-primary {
+  background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+}
+
+.promo-btn-primary:hover:not(.disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(79, 70, 229, 0.3);
+}
+
+.promo-btn-primary.disabled {
+  background: #f1f3f4;
+  color: #9aa0a6 !important;
+  box-shadow: none;
+  cursor: default;
+  opacity: 0.8;
+}
+
+.promo-btn-secondary .material-symbols-outlined,
+.promo-btn-primary .material-symbols-outlined {
+  font-size: 16px;
+}
+
+/* Status dots for cleaner UI */
+.status-dot-pending, .status-dot-live {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.status-dot-pending { background-color: #f2994a; }
+.status-dot-live { background-color: #27ae60; animation: pulse-green 2s infinite; }
+
+@keyframes pulse-green {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(39, 174, 96, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(39, 174, 96, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(39, 174, 96, 0); }
 }
 
 @media (prefers-color-scheme: dark) {

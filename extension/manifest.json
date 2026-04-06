@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "NotebookLM Enhancer",
-  "version": "1.7.5",
+  "version": "1.8.1",
   "description": "An enhancer for NotebookLM, providing folder management, advanced search and more.",
   "permissions": [
     "storage"
@@ -37,7 +37,8 @@
   "host_permissions": [
     "https://generativelanguage.googleapis.com/*",
     "https://notebooklm.google.com/*",
-    "https://*.googleusercontent.com/*"
+    "https://*.googleusercontent.com/*",
+    "https://apps.apple.com/*"
   ],
   "icons": {
     "16": "icons/icon.png",

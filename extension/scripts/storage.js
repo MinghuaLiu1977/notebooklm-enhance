@@ -131,6 +131,54 @@ var StorageManager = {
     } catch (e) {}
   },
 
+  async getTreeViewEnabled() {
+    if (!this.isContextValid()) return true;
+    try {
+      const result = await chrome.storage.local.get('nb_ext_tree_enabled');
+      return result.nb_ext_tree_enabled !== false;
+    } catch (e) {
+      return true;
+    }
+  },
+
+  async setTreeViewEnabled(isEnabled) {
+    if (this.isContextValid()) {
+      await chrome.storage.local.set({ 'nb_ext_tree_enabled': isEnabled });
+    }
+  },
+
+  async getDisplayMode() {
+    if (!this.isContextValid()) return 'single';
+    try {
+      const result = await chrome.storage.local.get('nb_ext_display_mode');
+      return result.nb_ext_display_mode || 'single';
+    } catch (e) {
+      return 'single';
+    }
+  },
+
+  async setDisplayMode(mode) {
+    if (this.isContextValid()) {
+      await chrome.storage.local.set({ 'nb_ext_display_mode': mode });
+    }
+  },
+
+  async getCollapsedFolderIds() {
+    if (!this.isContextValid()) return [];
+    try {
+      const result = await chrome.storage.local.get('nb_ext_collapsed_ids');
+      return result.nb_ext_collapsed_ids || [];
+    } catch (e) {
+      return [];
+    }
+  },
+
+  async setCollapsedFolderIds(ids) {
+    if (this.isContextValid()) {
+      await chrome.storage.local.set({ 'nb_ext_collapsed_ids': ids });
+    }
+  },
+
   extractNotebookId() {
     const match = window.location.href.match(/notebook\/([a-zA-Z0-9-]+)/);
     return match ? match[1] : null;

@@ -10,9 +10,10 @@ Are you using **NotebookLM** or other AI tools to generate insightful slides and
 ![SlideRev Hero](refine.png)
 ![SlideRev Hero](refine2.png)
 ![SlideRev Hero](editablepptx.png)
+
 ---
 
-### 🚀 Get SlideRev Now
+## 🚀 Get SlideRev Now
 
 [**Download on the Mac App Store**](https://apps.apple.com/us/app/slide-rev/id6761469500)
 
@@ -20,7 +21,7 @@ Are you using **NotebookLM** or other AI tools to generate insightful slides and
 
 ## Key System Features
 
-🔥 ### 1. AI-Powered Vision OCR
+### 🔥 1. AI-Powered Vision OCR
 
 Don't just extract text—reconstruct it. SlideRev identifies not only the characters but also their **exact position, font size, and color**. It performs a "one-to-one" replacement, turning blurry pixels into crisp, editable text layers.
 

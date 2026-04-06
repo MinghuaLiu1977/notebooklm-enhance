@@ -1,12 +1,13 @@
 var ToolbarManager = {
-  isToolbarEnabled: true,
-  isToolbarExpanded: true,
+  isToolbarEnabled: null,
+  isToolbarExpanded: null,
   isSourcePanelVisible: false,
 
   async initToolbar(manager) {
     console.log("[NB-Ext] ToolbarManager: initToolbar started");
     this.isToolbarEnabled = await StorageManager.getToolbarEnabled();
     this.isToolbarExpanded = await StorageManager.getToolbarExpanded();
+    console.log(`[NB-Ext] Persistence: Loaded toolbar states - Enabled: ${this.isToolbarEnabled}, Expanded: ${this.isToolbarExpanded}`);
     
     const shell = this.getOrCreateShell();
     let toolbar = shell.querySelector('.nb-ext-toolbar');
@@ -105,7 +106,7 @@ var ToolbarManager = {
 
     if (isMini) {
       // Mini Mode: Single Icon based on situation
-      let iconName = 'extension';
+      let iconName = 'icons/icon.svg';
       let tooltip = '展开工具栏 (Expand)';
       let onClick = () => this.toggleExpanded(manager);
 
@@ -124,7 +125,7 @@ var ToolbarManager = {
           tooltip = '启用功能 (Enable)';
           onClick = () => this.toggleEnabled(manager);
         } else if (isNotebook && !this.isToolbarExpanded) {
-          iconName = 'extension';
+          iconName = 'icons/icon.svg';
           tooltip = '展开工具栏 (Expand)';
           onClick = () => this.toggleExpanded(manager);
         } else if (isNotebook) {
@@ -148,16 +149,18 @@ var ToolbarManager = {
       const searchBtn = this.createButton('search', '高级搜索 (Search)', () => this.toggleSearchPanel(manager));
       if (manager.isSearchOpen) searchBtn.classList.add('active');
 
-      const viewBtn = this.createButton(manager.treeViewEnabled ? 'account_tree' : 'view_list', '切换视图 (View)', () => {
+      const viewBtn = this.createButton(manager.treeViewEnabled ? 'account_tree' : 'view_list', '切换视图 (View)', async () => {
         manager.treeViewEnabled = !manager.treeViewEnabled;
-        chrome.storage.local.set({ 'nb_ext_tree_enabled': manager.treeViewEnabled });
+        console.log(`[NB-Ext] Persistence: Setting treeViewEnabled to ${manager.treeViewEnabled}`);
+        await StorageManager.setTreeViewEnabled(manager.treeViewEnabled);
         manager.refreshData(true);
       });
       if (manager.treeViewEnabled) viewBtn.classList.add('active');
 
-      const modeBtn = this.createButton(manager.displayMode === 'single' ? 'view_headline' : 'view_agenda', '显示模式 (Mode)', () => {
+      const modeBtn = this.createButton(manager.displayMode === 'single' ? 'view_headline' : 'view_agenda', '显示模式 (Mode)', async () => {
         manager.displayMode = manager.displayMode === 'single' ? 'double' : 'single';
-        chrome.storage.local.set({ 'nb_ext_display_mode': manager.displayMode });
+        console.log(`[NB-Ext] Persistence: Setting displayMode to ${manager.displayMode}`);
+        await StorageManager.setDisplayMode(manager.displayMode);
         manager.refreshData(true);
       });
 
@@ -212,10 +215,21 @@ var ToolbarManager = {
     const btn = document.createElement('div');
     btn.className = 'nb-ext-toolbar-icon';
     btn.title = title;
-    const span = document.createElement('span');
-    span.className = 'material-symbols-outlined';
-    span.textContent = iconName;
-    btn.appendChild(span);
+    
+    if (iconName.endsWith('.svg') || iconName.endsWith('.png')) {
+      const img = document.createElement('img');
+      img.src = typeof chrome !== 'undefined' && chrome.runtime ? chrome.runtime.getURL(iconName) : iconName;
+      img.style.width = '24px';
+      img.style.height = '24px';
+      img.style.objectFit = 'contain';
+      btn.appendChild(img);
+    } else {
+      const span = document.createElement('span');
+      span.className = 'material-symbols-outlined';
+      span.textContent = iconName;
+      btn.appendChild(span);
+    }
+    
     btn.addEventListener('click', (e) => { 
       e.stopPropagation(); 
       onClick(); 
@@ -305,7 +319,7 @@ var ToolbarManager = {
 
   refreshToolbarStatus(manager) {
     const toolbar = document.querySelector('.nb-ext-toolbar');
-    if (!toolbar) return;
+    if (!toolbar || this.isToolbarEnabled === null) return;
     
     const isMini = !this.isSourcePanelVisible || !this.isToolbarEnabled || !this.isToolbarExpanded;
     toolbar.classList.toggle('nb-ext-toolbar-disabled', isMini);
@@ -319,6 +333,5 @@ var ToolbarManager = {
         icon.classList.toggle('active', manager.isSearchOpen);
       }
     });
-
   }
 };

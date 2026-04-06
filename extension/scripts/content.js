@@ -6,6 +6,7 @@ var NotebookManager = {
   sources: [],
   notes: [],
   displayMode: 'single', 
+  treeViewEnabled: true,
   collapsedFolderIds: [], 
   searchQuery: '',
   isSearchOpen: false,
@@ -60,7 +61,20 @@ var NotebookManager = {
       }
     } catch (e) {}
 
-    // 3. Global Styles
+    this.notebookId = StorageManager.extractNotebookId();
+    if (this.notebookId) {
+      // 1. Loading Settings FIRST
+      this.treeViewEnabled = await StorageManager.getTreeViewEnabled();
+      this.displayMode = await StorageManager.getDisplayMode();
+      this.collapsedFolderIds = await StorageManager.getCollapsedFolderIds();
+      
+      console.log("[NB-Ext] Settings loaded:", { 
+        view: this.treeViewEnabled, 
+        mode: this.displayMode 
+      });
+    }
+
+    // 2. Global Styles
     if (!document.getElementById('nb-ext-material-icons')) {
       const link = document.createElement('link');
       link.id = 'nb-ext-material-icons';
@@ -71,14 +85,14 @@ var NotebookManager = {
 
     document.body.classList.add('nb-ext-deep-mode');
 
-    // 4. Lifecycle monitoring
+    // 3. Lifecycle monitoring
     this.observer = new MutationObserver(() => {
       if (this.scanTimer) clearTimeout(this.scanTimer);
       this.scanTimer = setTimeout(() => this.refreshData(), 500);
     });
     this.observer.observe(document.body, { childList: true, subtree: true });
 
-    // 5. Shared background sync
+    // 4. Shared background sync
     setInterval(() => {
       if (this.notebookId) {
         LayoutEngine.syncContainerSize(this);
@@ -86,7 +100,7 @@ var NotebookManager = {
       }
     }, 1000);
 
-    // 6. Global click capture
+    // 5. Global click capture
     document.addEventListener('click', (e) => {
       if (!this.notebookId) return;
       const header = e.target.closest('.source-panel-header') || e.target.closest('[role="row"]');
@@ -97,21 +111,15 @@ var NotebookManager = {
     }, true);
 
     this.isInitialized = true;
-    console.log("[NB-Ext] Global services initialized.");
+    console.log("[NB-Ext] Persistence: Initialized with settings:", { 
+      treeView: this.treeViewEnabled, 
+      display: this.displayMode,
+      toolbarEnabled: ToolbarManager.isToolbarEnabled,
+      toolbarExpanded: ToolbarManager.isToolbarExpanded
+    });
 
-    // 7. Initial Notebook detection
-    this.notebookId = StorageManager.extractNotebookId();
     if (this.notebookId) {
-      // Safety check to prevent context invalidation leading to undefined chrome.storage.local
-      let settings = { nb_ext_tree_enabled: true, nb_ext_display_mode: 'single', nb_ext_collapsed_ids: [] };
-      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-        settings = await chrome.storage.local.get(['nb_ext_tree_enabled', 'nb_ext_display_mode', 'nb_ext_collapsed_ids']);
-      }
-      this.treeViewEnabled = settings.nb_ext_tree_enabled ?? true;
-      this.displayMode = settings.nb_ext_display_mode ?? 'single';
-      this.collapsedFolderIds = settings.nb_ext_collapsed_ids ?? [];
-      
-      this.refreshData();
+      this.refreshData(true);
     }
   },
 
@@ -140,6 +148,7 @@ var NotebookManager = {
   },
 
   async refreshData(force = false) {
+    if (!this.isInitialized && !force) return;
     try {
       await this.checkLicense();
       const needsRender = this.scanDom(force);
@@ -345,4 +354,5 @@ setInterval(() => {
   lastUrlNotebookId = currentId;
 }, 1000);
 
-setTimeout(() => NotebookManager.init(), 2000);
+// Start immediate monitoring
+NotebookManager.init();

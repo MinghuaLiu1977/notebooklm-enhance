@@ -33,7 +33,7 @@ var UIRenderer = {
 
       container.textContent = '';
 
-      ToolbarManager.initToolbar(manager);
+      await ToolbarManager.initToolbar(manager);
 
       if (manager.treeViewEnabled) {
         this.renderTreeView(manager, container, config);

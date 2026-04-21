@@ -62,24 +62,23 @@ var NotebookManager = {
     } catch (e) {}
 
     this.notebookId = StorageManager.extractNotebookId();
-    if (this.notebookId) {
-      // 1. Loading Settings FIRST
-      this.treeViewEnabled = await StorageManager.getTreeViewEnabled();
-      this.displayMode = await StorageManager.getDisplayMode();
-      this.collapsedFolderIds = await StorageManager.getCollapsedFolderIds();
-      
-      console.log("[NB-Ext] Settings loaded:", { 
-        view: this.treeViewEnabled, 
-        mode: this.displayMode 
-      });
-    }
+    
+    // 1. Loading Settings FIRST (Load unconditionally)
+    this.treeViewEnabled = await StorageManager.getTreeViewEnabled();
+    this.displayMode = await StorageManager.getDisplayMode();
+    this.collapsedFolderIds = await StorageManager.getCollapsedFolderIds();
+    
+    console.log("[NB-Ext] Settings loaded:", { 
+      view: this.treeViewEnabled, 
+      mode: this.displayMode 
+    });
 
     // 2. Global Styles
     if (!document.getElementById('nb-ext-material-icons')) {
       const link = document.createElement('link');
       link.id = 'nb-ext-material-icons';
       link.rel = 'stylesheet';
-      link.href = 'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,400,0,0';
+      link.href = chrome.runtime.getURL('styles/fonts.css');
       document.head.appendChild(link);
     }
 
@@ -230,7 +229,7 @@ var NotebookManager = {
         promoBtn.className = 'sliderev-promo-tooltip';
         promoBtn.innerHTML = `
           <span class="material-symbols-outlined promo-icon">auto_awesome</span>
-          <span class="promo-text">Want an editable edition?</span>
+          <span class="promo-text">Want an <mark class="promo-highlight">editable</mark> edition?</span>
         `;
         
         let clickedOnce = false;
@@ -248,7 +247,7 @@ var NotebookManager = {
                 clickedOnce = false;
                 promoBtn.innerHTML = `
                   <span class="material-symbols-outlined promo-icon">auto_awesome</span>
-                  <span class="promo-text">Want an editable edition?</span>
+                  <span class="promo-text">Want an <mark class="promo-highlight">editable</mark> edition?</span>
                 `;
                 promoBtn.classList.remove('sliderev-promo-second-state');
               }
@@ -258,7 +257,7 @@ var NotebookManager = {
             clickedOnce = false;
             promoBtn.innerHTML = `
               <span class="material-symbols-outlined promo-icon">auto_awesome</span>
-              <span class="promo-text">Want an editable edition?</span>
+              <span class="promo-text">Want an <mark class="promo-highlight">editable</mark> edition?</span>
             `;
             promoBtn.classList.remove('sliderev-promo-second-state');
           }

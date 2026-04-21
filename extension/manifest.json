@@ -47,7 +47,8 @@
         "images/*",
         "icons/*",
         "scripts/*",
-        "styles/*"
+        "styles/*",
+        "fonts/*"
       ],
       "matches": ["https://notebooklm.google.com/*"]
     }

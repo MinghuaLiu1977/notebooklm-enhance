@@ -1052,15 +1052,15 @@ body.dark-theme .nb-ext-license-input {
   transform: translateX(-50%) !important;
   display: flex !important;
   align-items: center !important;
-  background: rgba(255, 255, 255, 0.8) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
-  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  background: linear-gradient(120deg, #ffd60a 0%, #ffb703 100%) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid rgba(180, 120, 0, 0.25) !important;
   border-radius: 16px !important;
   padding: 6px 14px 6px 10px !important;
   cursor: pointer !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12) !important;
-  transition: opacity 0.3s ease, background 0.3s ease !important;
+  box-shadow: 0 4px 16px rgba(255, 183, 3, 0.45) !important;
+  transition: opacity 0.3s ease, background 0.3s ease, box-shadow 0.3s ease !important;
   z-index: 2147483647 !important;
   max-width: 300px !important;
   height: 32px !important;
@@ -1069,21 +1069,22 @@ body.dark-theme .nb-ext-license-input {
 }
 
 body.dark-theme .sliderev-promo-tooltip {
-  background: rgba(40, 40, 40, 0.7) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+  background: linear-gradient(120deg, #b45309 0%, #d97706 100%) !important;
+  border: 1px solid rgba(255, 183, 3, 0.2) !important;
+  box-shadow: 0 4px 16px rgba(180, 83, 9, 0.45) !important;
 }
 
 .sliderev-promo-tooltip:hover {
-  background: rgba(255, 255, 255, 0.95) !important;
+  background: linear-gradient(120deg, #ffe033 0%, #ffc300 100%) !important;
+  box-shadow: 0 6px 20px rgba(255, 183, 3, 0.6) !important;
 }
 
 body.dark-theme .sliderev-promo-tooltip:hover {
-  background: rgba(40, 40, 40, 0.95) !important;
+  background: linear-gradient(120deg, #c2620e 0%, #e58c0a 100%) !important;
 }
 
 .sliderev-promo-tooltip .promo-icon {
-  color: var(--nb-ext-text-muted) !important;
+  color: #7a4a00 !important;
   font-size: 16px !important;
   flex-shrink: 0 !important;
   width: 16px !important;
@@ -1096,23 +1097,35 @@ body.dark-theme .sliderev-promo-tooltip:hover {
 
 .sliderev-promo-tooltip .promo-text {
   font-size: 12.5px !important;
-  font-weight: 500 !important;
-  color: #1f1f1f !important;
+  font-weight: 600 !important;
+  color: #5c3100 !important;
   white-space: nowrap !important;
 }
 
+.sliderev-promo-tooltip .promo-highlight {
+  font-weight: 800 !important;
+  font-style: normal !important;
+  background: none !important;
+  color: inherit !important;
+  text-decoration: none !important;
+}
+
 body.dark-theme .sliderev-promo-tooltip .promo-text {
-  color: #e8eaed !important;
+  color: #fff3cd !important;
+}
+
+body.dark-theme .sliderev-promo-tooltip .promo-highlight {
+  color: #fff3cd !important;
 }
 
 .sliderev-promo-tooltip .promo-icon {
-  color: #5f6368 !important;
+  color: #7a4a00 !important;
   font-size: 16px !important;
   margin-right: 6px !important;
 }
 
 body.dark-theme .sliderev-promo-tooltip .promo-icon {
-  color: #9aa0a6 !important;
+  color: #fff3cd !important;
 }
 
 /* Second State (Action) */

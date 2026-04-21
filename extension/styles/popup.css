@@ -221,6 +221,15 @@ p {
   line-height: 1.5;
 }
 
+.highlight-word {
+  background: linear-gradient(120deg, #ffd60a 0%, #ffb703 100%);
+  color: #1a1a1a;
+  border-radius: 3px;
+  padding: 0 3px;
+  font-weight: 600;
+  font-style: normal;
+}
+
 .promo-actions-group {
   display: flex;
   gap: 8px;
@@ -293,5 +302,9 @@ p {
   .sliderev-promo {
     border-color: #1a73e833;
     background: linear-gradient(145deg, #2d2e31 0%, #1a73e811 100%);
+  }
+  .highlight-word {
+    background: linear-gradient(120deg, #b45309 0%, #d97706 100%);
+    color: #fff8e7;
   }
 }

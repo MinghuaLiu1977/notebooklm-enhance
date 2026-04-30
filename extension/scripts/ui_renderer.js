@@ -372,9 +372,6 @@ var UIRenderer = {
     menu.className = 'nb-ext-move-menu';
 
     const rect = trigger.getBoundingClientRect();
-    menu.style.top = `${rect.bottom + window.scrollY + 5}px`;
-    menu.style.left = `${rect.left + window.scrollX}px`;
-
 
     // File Actions
     menu.appendChild(this.createMenuItem('Rename', 'edit', () => {
@@ -428,18 +425,39 @@ var UIRenderer = {
 
     // Adjust position to prevent rendering off-screen
     const menuRect = menu.getBoundingClientRect();
+    const vh = window.innerHeight;
+    const vw = window.innerWidth;
+    const margin = 10;
+    
     let left = rect.left + window.scrollX;
     let top = rect.bottom + window.scrollY + 5;
 
-    if (rect.left + menuRect.width > window.innerWidth) {
-      left = window.innerWidth - menuRect.width - 10;
-    }
-    if (rect.bottom + menuRect.height + 5 > window.innerHeight) {
-      top = rect.top + window.scrollY - menuRect.height - 5;
+    // Horizontal adjustment
+    if (rect.left + menuRect.width > vw - margin) {
+      left = vw - menuRect.width - margin + window.scrollX;
     }
 
-    menu.style.left = `${Math.max(10, left)}px`;
-    menu.style.top = `${Math.max(10, top)}px`;
+    // Vertical adjustment
+    const spaceBelow = vh - rect.bottom - margin;
+    const spaceAbove = rect.top - margin;
+
+    if (rect.bottom + menuRect.height + 5 > vh - margin) {
+      // Doesn't fit below, try above
+      if (spaceAbove > spaceBelow) {
+        top = rect.top + window.scrollY - menuRect.height - 5;
+        // If it still doesn't fit above, cap it and let it scroll
+        if (top < window.scrollY + margin) {
+          top = window.scrollY + margin;
+          menu.style.maxHeight = `${spaceAbove}px`;
+        }
+      } else {
+        // Fits better below even if cramped, cap it
+        menu.style.maxHeight = `${spaceBelow}px`;
+      }
+    }
+
+    menu.style.left = `${Math.max(margin, left)}px`;
+    menu.style.top = `${Math.max(margin, top)}px`;
 
     const closeHandler = (e) => {
       if (!menu.contains(e.target) && !trigger.contains(e.target)) {

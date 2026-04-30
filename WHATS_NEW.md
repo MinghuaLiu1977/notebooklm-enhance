@@ -1,3 +1,10 @@
+# What's New in v1.8.5
+
+### ✨ Enhancements
+* **Smart Context Menu Positioning**: Re-engineered the "Move to" context menu to intelligently detect viewport boundaries. It now automatically chooses between opening upwards or downwards based on available space and includes a scrollbar for extensive folder lists, ensuring menu items are never cut off.
+
+---
+
 # What's New in v1.8.4
 
 ### ✨ Enhancements

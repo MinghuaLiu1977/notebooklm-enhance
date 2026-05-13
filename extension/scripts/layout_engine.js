@@ -1,140 +1,50 @@
 /**
- * NotebookLM Enhancer - Layout Engine
+ * NotebookLM Enhancer - Layout Engine (Native Focus)
  */
 var LayoutEngine = {
-  // Core method for accurately aligning to the size and position of the native scroll area
+  // Sync the floating shell position relative to the sidebar
   syncContainerSize(manager) {
-    const container = document.getElementById('nb-ext-container');
-    const toolbars = document.querySelectorAll('.nb-ext-toolbar');
     const shell = document.querySelector('.nb-ext-floating-shell');
-    const scrollArea = document.querySelector('.scroll-area-desktop') || document.querySelector('.mat-drawer-inner-container');
-    const sidebarContent = scrollArea ? scrollArea.parentElement : document.querySelector('[class*="source-panel"]');
-
+    const scrollArea = document.querySelector('.scroll-area-desktop') || 
+                       document.querySelector('.mat-drawer-inner-container') ||
+                       document.querySelector('.source-panel-content');
+    
     const isMainListView = ViewDetector.isMainListView(manager);
     const isNativeCollapsed = ViewDetector.isNativeCollapsed();
 
-    // Self-healing logic - If it should be displayed but container is missing (e.g., destroyed by native), trigger recovery
-    if (isMainListView && !isNativeCollapsed && !container && scrollArea && scrollArea.offsetWidth >= 150) {
-      console.log("[NB-Ext] Container missing in active view, triggering recovery...");
-      manager.refreshData(true);
-      return;
-    }
-
-    if (scrollArea && sidebarContent && container) {
+    if (scrollArea && isMainListView && !isNativeCollapsed) {
       const targetRect = scrollArea.getBoundingClientRect();
-      const parentRect = sidebarContent.getBoundingClientRect();
-      const width = targetRect.width;
-      const sourcePanel = document.querySelector('[class*="source-panel"]') || document.querySelector('.source-panel-content');
-      const isPanelVisible = !!(sourcePanel && sourcePanel.offsetWidth > 0);
-      const isToolbarEnabled = ToolbarManager.isToolbarEnabled;
-
-      if (width >= 150 && !isNativeCollapsed && isMainListView && isPanelVisible && isToolbarEnabled) {
-        document.body.classList.remove('nb-ext-is-collapsed');
-        container.style.display = 'flex';
-        toolbars.forEach(t => t.style.removeProperty('display'));
+      
+      if (shell) {
+        shell.style.visibility = 'visible';
+        shell.classList.remove('nb-ext-shell-collapsed');
         
-        // Atomic synchronization to mask native content
-        scrollArea.style.visibility = 'hidden';
-
-        if (getComputedStyle(sidebarContent).position === 'static') {
-          sidebarContent.style.position = 'relative';
-        }
-        container.style.top = `${targetRect.top - parentRect.top}px`;
-        container.style.left = `${targetRect.left - parentRect.left}px`;
-        container.style.width = `${targetRect.width}px`;
-        container.style.height = 'auto';
-        container.style.maxHeight = `${targetRect.height}px`;
-
-        // Shell positioning (Toolbar + Search)
-        if (shell) {
-          shell.style.visibility = 'visible';
-          shell.classList.remove('nb-ext-shell-collapsed');
+        // Position shell over the sidebar
+        shell.style.left = `${targetRect.left}px`;
+        shell.style.width = `${targetRect.width}px`;
+        shell.style.bottom = '24px';
+        
+        if (!ToolbarManager.isToolbarEnabled) {
+          shell.classList.add('nb-ext-shell-mini');
+          shell.style.width = '48px';
+          shell.style.left = `${targetRect.left + 12}px`;
+        } else {
           shell.classList.remove('nb-ext-shell-mini');
-          shell.style.left = `${targetRect.left}px`;
-          shell.style.width = `${targetRect.width}px`;
-          shell.style.bottom = '24px';
         }
-      } else {
-        // Standby or Unsupported state
-        if (width > 0 && isNativeCollapsed) document.body.classList.add('nb-ext-is-collapsed');
-        
-        container.style.setProperty('display', 'none', 'important');
+      }
+      
+      // Ensure native scroll area is visible
+      scrollArea.style.visibility = 'visible';
+    } else {
+      // Standby or Unsupported state
+      if (shell) {
+        shell.style.visibility = 'hidden';
+        shell.classList.add('nb-ext-shell-collapsed');
+      }
+      if (scrollArea) {
         scrollArea.style.visibility = 'visible';
-
-        if (isMainListView) {
-         // Allow shell (toolbar icon) to be visible even if collapsed/hidden
-         if (shell) {
-           const isStandby = !ToolbarManager.isToolbarEnabled;
-           
-           // If collapsed, we hide the shell regardless of standby status to avoid "white circle" ghosting
-           if (isNativeCollapsed) {
-             shell.style.visibility = 'hidden';
-             shell.classList.add('nb-ext-shell-collapsed');
-           } else {
-             shell.style.visibility = 'visible';
-             shell.classList.remove('nb-ext-shell-collapsed');
-             if (isStandby) {
-               shell.style.left = '16px'; 
-               shell.style.width = '40px';
-               shell.style.bottom = '24px';
-               shell.classList.add('nb-ext-shell-mini');
-             } else {
-               shell.classList.remove('nb-ext-shell-mini');
-             }
-           }
-         }
-      } else {
-         // On non-notebook pages or non-list views, we check if we should still show standby
-         const isNotebook = window.location.href.includes('/notebook/');
-         // Only show standby in notebook pages IF the panel is not collapsed
-         if (isNotebook && shell && !isNativeCollapsed) {
-           shell.style.visibility = 'visible';
-           shell.classList.remove('nb-ext-shell-collapsed');
-           shell.classList.add('nb-ext-shell-mini');
-           shell.style.left = '16px';
-           shell.style.bottom = '24px';
-           shell.style.width = '40px';
-         } else if (shell) {
-           shell.style.visibility = 'hidden';
-           shell.classList.add('nb-ext-shell-collapsed');
-         }
-        }
       }
-      } else {
-        // Recovery or Unsupported View
-        const isMainListView = ViewDetector.isMainListView(manager);
-        const isNativeCollapsed = ViewDetector.isNativeCollapsed();
-        const isDocumentView = ViewDetector.isDocumentView();
-
-        if (!isMainListView || isNativeCollapsed || isDocumentView) {
-          // Only hide toolbars if we are NOT in a notebook page
-          // If in notebook, we want to at least show the standby button
-          const isNotebook = window.location.href.includes('/notebook/');
-          
-          if (shell) {
-            // Hide shell if sidebar is collapsed, or if we are in document view
-            if (!isNotebook || isNativeCollapsed || isDocumentView) {
-              shell.style.visibility = 'hidden';
-              shell.classList.add('nb-ext-shell-collapsed');
-            } else {
-              // Show standby (mini) only if not collapsed/document view
-              shell.style.visibility = 'visible';
-              shell.classList.remove('nb-ext-shell-collapsed');
-              shell.classList.add('nb-ext-shell-mini');
-              shell.style.left = '16px';
-              shell.style.bottom = '24px';
-              shell.style.width = '40px';
-            }
-          }
-
-          if (!isNotebook) {
-            toolbars.forEach(t => t.style.setProperty('display', 'none', 'important'));
-          }
-        }
-        if (container) container.style.display = 'none';
-        if (scrollArea) scrollArea.style.visibility = 'visible';
-      }
-
+    }
   },
 
   initSidebarObserver(manager, target) {

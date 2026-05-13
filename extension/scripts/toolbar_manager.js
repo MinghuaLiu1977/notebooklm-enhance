@@ -1,342 +1,167 @@
+/**
+ * NotebookLM Enhancer - Toolbar Manager (Native Focus + SVG Icons)
+ */
 var ToolbarManager = {
-  isToolbarEnabled: null,
-  isToolbarExpanded: null,
-  isSourcePanelVisible: false,
+  isToolbarEnabled: true,
 
-  async initToolbar(manager) {
-    this.isToolbarEnabled = await StorageManager.getToolbarEnabled();
-    this.isToolbarExpanded = await StorageManager.getToolbarExpanded();
-    
-    const shell = this.getOrCreateShell();
-    let toolbar = shell.querySelector('.nb-ext-toolbar');
-    if (!toolbar) {
-      toolbar = document.createElement('div');
-      toolbar.className = 'nb-ext-toolbar';
-      shell.appendChild(toolbar);
-    }
-
-    this.updatePosition(manager);
-    this.renderButtons(manager, toolbar);
-    this.refreshToolbarStatus(manager);
+  // SVG Icons
+  icons: {
+    search: `<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>`,
+    single: `<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M15 15H3v2h12v-2zm0-8H3v2h12V7zM3 13h18v-2H3v2zm0 8h18v-2H3v2zM3 3v2h18V3H3z"/></svg>`,
+    double: `<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M4 15h16v-2H4v2zm0 4h16v-2H4v2zm0-8h16V9H4v2zm0-6v2h16V5H4z"/></svg>`,
+    settings: `<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/></svg>`,
+    close: `<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>`,
+    chevronLeft: `<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>`,
+    chevronRight: `<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>`,
+    checkAll: `<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M18 7l-1.41-1.41-6.34 6.34 1.41 1.41L18 7zm4.24-1.41L11.66 16.17 7.48 12l-1.41 1.41L11.66 19l12-12-1.42-1.41zM.41 13.41L6 19l1.41-1.41L1.83 12 .41 13.41z"/></svg>`
   },
 
-  getOrCreateShell() {
+  async initToolbar(manager) {
     let shell = document.querySelector('.nb-ext-floating-shell');
     if (!shell) {
       shell = document.createElement('div');
       shell.className = 'nb-ext-floating-shell';
       document.body.appendChild(shell);
     }
-    return shell;
-  },
 
-  updatePosition(manager) {
-    const toolbar = document.querySelector('.nb-ext-toolbar');
-    const sourcePanel = document.querySelector('[class*="source-panel"]') || document.querySelector('.source-panel-content');
+    shell.textContent = '';
     
-    if (!toolbar) return;
-
-    // Strict detection using ViewDetector
-    const isMainList = ViewDetector.isMainListView();
-    const isCollapsed = ViewDetector.isNativeCollapsed();
-    const oldVisible = this.isSourcePanelVisible;
-    this.isSourcePanelVisible = !!(sourcePanel && isMainList && !isCollapsed);
-
-    if (this.isSourcePanelVisible && !oldVisible && toolbar) {
-      this.renderButtons(manager, toolbar);
+    if (!this.isToolbarEnabled) {
+      shell.classList.add('nb-ext-shell-mini');
+      // Shrunk state: Render single expand button
+      const expandBtn = document.createElement('button');
+      expandBtn.className = 'nb-ext-btn-icon nb-ext-btn-expand';
+      expandBtn.innerHTML = this.icons.chevronRight;
+      expandBtn.title = 'Expand Toolbar';
+      expandBtn.onclick = () => {
+        this.isToolbarEnabled = true;
+        chrome.storage.local.set({ 'nb_ext_toolbar_enabled': true });
+        manager.refreshData(true);
+      };
+      shell.appendChild(expandBtn);
+      return;
     }
 
-    const isNotebook = window.location.href.includes('/notebook/');
-    const isMini = !this.isSourcePanelVisible || !this.isToolbarEnabled || !this.isToolbarExpanded;
-    const isDocumentView = ViewDetector.isDocumentView();
+    shell.classList.remove('nb-ext-shell-mini');
+    // Create Main Toolbar
+    const toolbar = document.createElement('div');
+    toolbar.className = 'nb-ext-toolbar';
 
-    if (isDocumentView) {
-      if (toolbar) {
-          toolbar.style.visibility = 'hidden';
-          toolbar.style.pointerEvents = 'none';
-      }
-      const shell = document.querySelector('.nb-ext-floating-shell');
-      if (shell) {
-        shell.style.visibility = 'hidden';
-        shell.classList.add('nb-ext-shell-collapsed');
-      }
-    } else if (this.isSourcePanelVisible || (isNotebook && isMini && !isCollapsed)) {
-      if (toolbar) {
-          toolbar.style.display = 'flex';
-          toolbar.style.visibility = 'visible';
-          toolbar.style.pointerEvents = 'auto';
-      }
-      const shell = document.querySelector('.nb-ext-floating-shell');
-      if (shell) {
-        shell.style.visibility = 'visible';
-        // Only trigger collapsed visual/pointer state if sidebar is indeed collapsed and we're NOT showing a standalone mini button
-        if (isCollapsed && this.isSourcePanelVisible) {
-          shell.classList.add('nb-ext-shell-collapsed');
-        } else {
-          shell.classList.remove('nb-ext-shell-collapsed');
-        }
-        if (isMini) {
-          shell.classList.add('nb-ext-shell-mini');
-        } else {
-          shell.classList.remove('nb-ext-shell-mini');
-        }
-      }
-    } else {
-      if (toolbar) {
-          toolbar.style.visibility = 'hidden';
-          toolbar.style.pointerEvents = 'none';
-      }
-      const shell = document.querySelector('.nb-ext-floating-shell');
-      if (shell) {
-        shell.style.visibility = 'hidden';
-        shell.classList.add('nb-ext-shell-collapsed');
-      }
-    }
-
+    this.renderButtons(manager, toolbar);
     
-    this.refreshToolbarStatus(manager);
+    if (manager.isSearchOpen) {
+      toolbar.style.setProperty('display', 'none', 'important');
+    }
+    shell.appendChild(toolbar);
+
+    // Create Search Panel
+    if (manager.isSearchOpen) {
+      const searchPanel = this.renderSearchPanel(manager);
+      shell.appendChild(searchPanel);
+    }
   },
 
   renderButtons(manager, toolbar) {
-    toolbar.textContent = '';
-
-    const isMini = !this.isSourcePanelVisible || !this.isToolbarEnabled || !this.isToolbarExpanded;
-
-    if (isMini) {
-      // Mini Mode: Single Icon based on situation
-      let iconName = 'icons/icon.svg';
-      let tooltip = '展开工具栏 (Expand)';
-      let onClick = () => this.toggleExpanded(manager);
-
-      const isNotebook = window.location.href.includes('/notebook/');
-
-      if (!this.isSourcePanelVisible) {
-        // If panel strictly HIDDEN or strictly COLLAPSED, show refresh only if detection failed
-        // User wants "Folded" icon at start instead of refresh
-        iconName = 'refresh';
-        tooltip = '备用 (源面板已收缩/隐藏)';
-        onClick = () => manager.refreshData(true);
-
-        // If we're in a notebook, don't show refresh at start if it's the first render
-        if (isNotebook && !this.isToolbarEnabled) {
-          iconName = 'play_arrow';
-          tooltip = '启用功能 (Enable)';
-          onClick = () => this.toggleEnabled(manager);
-        } else if (isNotebook && !this.isToolbarExpanded) {
-          iconName = 'icons/icon.svg';
-          tooltip = '展开工具栏 (Expand)';
-          onClick = () => this.toggleExpanded(manager);
-        } else if (isNotebook) {
-          // If in notebook and supposedly expanded but panel missing, 
-          // show play_arrow (Standby) instead of "Folded" icon
-          iconName = 'play_arrow';
-          tooltip = '待机 (等待面板加载...)';
-          onClick = () => manager.refreshData(true);
-        }
-      } else if (!this.isToolbarEnabled) {
-        iconName = 'play_arrow';
-        tooltip = '启用功能 (Enable)';
-        onClick = () => this.toggleEnabled(manager);
+    // 1. Search Button
+    const searchBtn = document.createElement('button');
+    searchBtn.className = `nb-ext-btn-icon ${manager.isSearchOpen ? 'nb-ext-btn-active' : ''}`;
+    searchBtn.innerHTML = this.icons.search;
+    searchBtn.title = 'Search Sources';
+    searchBtn.onclick = () => {
+      manager.isSearchOpen = !manager.isSearchOpen;
+      if (manager.isSearchOpen) {
+        manager.searchQuery = ''; // Reset on open
       }
+      manager.refreshData(true);
+    };
+    toolbar.appendChild(searchBtn);
 
-      const toggleBtn = this.createButton(iconName, tooltip, onClick);
-      toggleBtn.classList.add('nb-ext-toggle-btn');
-      toolbar.appendChild(toggleBtn);
-    } else {
-      // ... (Rest of Full Mode remains the same)
-      const searchBtn = this.createButton('search', '高级搜索 (Search)', () => this.toggleSearchPanel(manager));
-      if (manager.isSearchOpen) searchBtn.classList.add('active');
+    // 2. Display Mode Button
+    const modeBtn = document.createElement('button');
+    modeBtn.className = 'nb-ext-btn-icon';
+    const isDouble = manager.displayMode === 'double';
+    modeBtn.innerHTML = isDouble ? this.icons.single : this.icons.double;
+    modeBtn.title = isDouble ? 'Switch to Single Line' : 'Switch to Double Line';
+    modeBtn.onclick = () => {
+      manager.displayMode = isDouble ? 'single' : 'double';
+      chrome.storage.local.set({ 'nb_ext_display_mode': manager.displayMode });
+      manager.refreshData(true);
+    };
+    toolbar.appendChild(modeBtn);
 
-      const viewBtn = this.createButton(manager.treeViewEnabled ? 'account_tree' : 'view_list', '切换视图 (View)', async () => {
-        manager.treeViewEnabled = !manager.treeViewEnabled;
-        console.log(`[NB-Ext] Persistence: Setting treeViewEnabled to ${manager.treeViewEnabled}`);
-        await StorageManager.setTreeViewEnabled(manager.treeViewEnabled);
-        manager.refreshData(true);
-      });
-      if (manager.treeViewEnabled) viewBtn.classList.add('active');
-
-      const modeBtn = this.createButton(manager.displayMode === 'single' ? 'view_headline' : 'view_agenda', '显示模式 (Mode)', async () => {
-        manager.displayMode = manager.displayMode === 'single' ? 'double' : 'single';
-        console.log(`[NB-Ext] Persistence: Setting displayMode to ${manager.displayMode}`);
-        await StorageManager.setDisplayMode(manager.displayMode);
-        manager.refreshData(true);
-      });
-
-      const addDirBtn = this.createButton('create_new_folder', '新建文件夹 (New Folder)', () => {
-        UIRenderer.renderFolderCreator(manager);
-      });
-
-      toolbar.append(searchBtn, viewBtn, modeBtn, addDirBtn);
-
-      const spacer = document.createElement('div');
-      spacer.style.width = '4px';
-      toolbar.appendChild(spacer);
-
-      const disableBtn = this.createButton('power_settings_new', '进入备用状态 (Standby)', () => this.toggleEnabled(manager));
-      disableBtn.style.color = '#d93025'; 
-      
-      const foldBtn = this.createButton('chevron_left', '收起 (Fold)', () => this.toggleExpanded(manager));
-
-      toolbar.append(disableBtn, foldBtn);
-    }
+    // 3. Shrink Button
+    const shrinkBtn = document.createElement('button');
+    shrinkBtn.className = 'nb-ext-btn-icon';
+    shrinkBtn.innerHTML = this.icons.chevronLeft;
+    shrinkBtn.title = 'Shrink Toolbar';
+    shrinkBtn.onclick = () => {
+      this.isToolbarEnabled = false;
+      chrome.storage.local.set({ 'nb_ext_toolbar_enabled': false });
+      manager.refreshData(true);
+    };
+    toolbar.appendChild(shrinkBtn);
   },
 
-  async toggleEnabled(manager) {
-    if (!this.isToolbarEnabled) {
-      // Trying to ENABLE: Strict check
-      if (ViewDetector.isNativeCollapsed() || !ViewDetector.isMainListView()) {
-        console.log("[NB-Ext] Cannot enable: Source panel is collapsed or hidden.");
-        manager.refreshData(true); // Rescan instead
-        return;
-      }
-    }
+  renderSearchPanel(manager) {
+    const panel = document.createElement('div');
+    panel.className = 'nb-ext-search-panel';
 
-    this.isToolbarEnabled = !this.isToolbarEnabled;
-    await StorageManager.setToolbarEnabled(this.isToolbarEnabled);
-    if (this.isToolbarEnabled) {
-        this.isToolbarExpanded = true; // Auto expand when re-enabling
-        await StorageManager.setToolbarExpanded(true);
-    }
-    manager.refreshData(true);
-    this.renderButtons(manager, document.querySelector('.nb-ext-toolbar'));
-    this.refreshToolbarStatus(manager);
-  },
+    const wrapper = document.createElement('div');
+    wrapper.className = 'nb-ext-search-input-wrapper';
 
-  async toggleExpanded(manager) {
-    this.isToolbarExpanded = !this.isToolbarExpanded;
-    await StorageManager.setToolbarExpanded(this.isToolbarExpanded);
-    this.renderButtons(manager, document.querySelector('.nb-ext-toolbar'));
-    this.refreshToolbarStatus(manager);
-  },
-
-  createButton(iconName, title, onClick) {
-    const btn = document.createElement('div');
-    btn.className = 'nb-ext-toolbar-icon';
-    btn.title = title;
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'nb-ext-search-input';
+    input.placeholder = 'Search sources...';
+    input.value = manager.searchQuery;
     
-    if (iconName.endsWith('.svg') || iconName.endsWith('.png')) {
-      const img = document.createElement('img');
-      img.src = typeof chrome !== 'undefined' && chrome.runtime ? chrome.runtime.getURL(iconName) : iconName;
-      img.style.width = '24px';
-      img.style.height = '24px';
-      img.style.objectFit = 'contain';
-      btn.appendChild(img);
-    } else {
-      const span = document.createElement('span');
-      span.className = 'material-symbols-outlined';
-      span.textContent = iconName;
-      btn.appendChild(span);
-    }
-    
-    btn.addEventListener('click', (e) => { 
-      e.stopPropagation(); 
-      onClick(); 
+    input.addEventListener('input', (e) => {
+      manager.searchQuery = e.target.value;
+      UIRenderer.applyFilter(manager);
     });
-    return btn;
-  },
 
-  closeSearchPanel(manager) {
-    manager.isSearchOpen = false;
-    const panel = document.getElementById('nb-ext-search-panel');
-    panel?.remove();
-    if (manager.sidebarObserver) {
-      manager.sidebarObserver.disconnect();
-      manager.sidebarObserver = null;
-    }
-    manager.searchQuery = '';
-    UIRenderer.applyFilter(manager);
-    this.refreshToolbarStatus(manager);
-  },
-
-  toggleSearchPanel(manager) {
-    const currentlyOpen = manager.isSearchOpen;
-    
-    if (currentlyOpen) {
-      this.closeSearchPanel(manager);
-    } else {
-      manager.isSearchOpen = true;
-      let panel = document.getElementById('nb-ext-search-panel');
-      if (!panel) {
-        panel = document.createElement('div');
-        panel.id = 'nb-ext-search-panel';
-        panel.className = 'nb-ext-search-panel';
-        this.getOrCreateShell().appendChild(panel);
-      }
-      
-      const sidebarContent = document.querySelector('[class*="source-panel"]') || document.querySelector('.source-panel-content');
-      if (sidebarContent) {
-        LayoutEngine.initSidebarObserver(manager, sidebarContent);
-      }
-      
-      panel.textContent = '';
-      const box = document.createElement('div');
-      box.className = 'nb-ext-search-box';
-
-      const hintIcon = document.createElement('span');
-      hintIcon.className = 'material-symbols-outlined search-hint-icon';
-      hintIcon.textContent = 'search';
-
-      const input = document.createElement('input');
-      input.type = 'text';
-      input.className = 'nb-ext-search-input-float';
-      input.placeholder = 'Search... (Space=OR, +=AND)';
-      input.value = manager.searchQuery;
-
-      const closeIcon = document.createElement('span');
-      closeIcon.className = 'material-symbols-outlined search-close-icon';
-      closeIcon.textContent = 'close';
-      closeIcon.addEventListener('click', () => this.closeSearchPanel(manager));
-
-      box.append(hintIcon, input, closeIcon);
-
-      const help = document.createElement('div');
-      help.className = 'nb-ext-search-help';
-      help.textContent = 'Example: "doc pdf + 2025" matches (doc OR pdf) AND 2025';
-
-      panel.append(box, help);
-      
-      const inputEl = panel.querySelector('input');
-      setTimeout(() => {
-        if (inputEl) {
-          inputEl.focus();
-        }
-      }, 100);
-      
-      inputEl.addEventListener('compositionstart', () => manager.isComposing = true);
-      inputEl.addEventListener('compositionend', (e) => { 
-        manager.isComposing = false; 
-        manager.searchQuery = e.target.value; 
-        UIRenderer.applyFilter(manager); 
-      });
-      inputEl.addEventListener('input', (e) => { 
-        if (!manager.isComposing) { 
-          manager.searchQuery = e.target.value; 
-          UIRenderer.applyFilter(manager); 
-        } 
-      });
-      inputEl.addEventListener('keydown', (e) => { 
-        if (e.key === 'Escape') this.closeSearchPanel(manager); 
-      });
-
-      this.refreshToolbarStatus(manager);
-    }
-  },
-
-  refreshToolbarStatus(manager) {
-    const toolbar = document.querySelector('.nb-ext-toolbar');
-    if (!toolbar || this.isToolbarEnabled === null) return;
-    
-    const isMini = !this.isSourcePanelVisible || !this.isToolbarEnabled || !this.isToolbarExpanded;
-    toolbar.classList.toggle('nb-ext-toolbar-disabled', isMini);
-    
-    const icons = toolbar.querySelectorAll('.nb-ext-toolbar-icon');
-    icons.forEach(icon => {
-      const span = icon.querySelector('span');
-      if (!span) return;
-      
-      if (span.textContent === 'search') {
-        icon.classList.toggle('active', manager.isSearchOpen);
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        manager.isSearchOpen = false;
+        manager.refreshData(true);
       }
     });
+
+    const clear = document.createElement('span');
+    clear.className = 'nb-ext-search-clear';
+    clear.innerHTML = this.icons.close;
+    clear.title = 'Clear/Close Search';
+    clear.onclick = () => {
+      if (input.value) {
+        manager.searchQuery = '';
+        input.value = '';
+        input.focus();
+        UIRenderer.applyFilter(manager);
+      } else {
+        manager.isSearchOpen = false;
+        manager.refreshData(true);
+      }
+    };
+
+    const selectAllBtn = document.createElement('span');
+    selectAllBtn.className = 'nb-ext-search-select-all';
+    selectAllBtn.innerHTML = this.icons.checkAll;
+    selectAllBtn.title = 'Select All Matching Sources';
+    selectAllBtn.onclick = () => {
+      UIRenderer.selectAllVisible();
+    };
+
+    wrapper.append(input, selectAllBtn, clear);
+
+    const info = document.createElement('div');
+    info.className = 'nb-ext-search-info';
+    info.textContent = 'Use + for AND search';
+
+    panel.append(wrapper, info);
+
+    setTimeout(() => input.focus(), 50);
+    return panel;
   }
 };
+
+if (typeof window !== 'undefined') window.ToolbarManager = ToolbarManager;

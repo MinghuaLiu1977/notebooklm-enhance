@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "NotebookLM Enhancer",
-  "version": "1.8.5",
-  "description": "An enhancer for NotebookLM, providing folder management, advanced search and more.",
+  "version": "1.9.2",
+  "description": "An enhancer for NotebookLM, providing advanced search and double-line display mode.",
   "permissions": [
     "storage"
   ],
@@ -23,7 +23,6 @@
         "styles/main.css"
       ],
       "js": [
-        "scripts/utils.js",
         "scripts/view_detector.js",
         "scripts/storage.js",
         "scripts/layout_engine.js",
@@ -35,20 +34,14 @@
     }
   ],
   "host_permissions": [
-    "https://generativelanguage.googleapis.com/*",
-    "https://notebooklm.google.com/*",
-    "https://*.googleusercontent.com/*",
-    "https://apps.apple.com/*"
+    "https://notebooklm.google.com/*"
   ],
   "web_accessible_resources": [
     {
       "resources": [
-        "sliderev.html",
-        "images/*",
         "icons/*",
         "scripts/*",
-        "styles/*",
-        "fonts/*"
+        "styles/*"
       ],
       "matches": ["https://notebooklm.google.com/*"]
     }

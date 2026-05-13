@@ -1,83 +1,9 @@
+/**
+ * NotebookLM Enhancer - Storage Manager (Simplified for v1.8.6+)
+ */
 var StorageManager = {
-  // Check if extension context is valid
   isContextValid() {
     return typeof chrome !== 'undefined' && !!chrome.runtime && !!chrome.runtime.id;
-  },
-
-  // Environment check: Is this running in a popup or a content script?
-  isPopup() {
-    try {
-      if (!this.isContextValid()) return false;
-      // In MV3, we check if we're in the extension's own origin but not in a content script context
-      // chrome.extension.getBackgroundPage is often unavailable in MV3
-      return typeof window !== 'undefined' && 
-             window.location.protocol === 'chrome-extension:' && 
-             !window.location.href.includes('background');
-    } catch (e) {
-      return false;
-    }
-  },
-
-  async getNotebookConfig(notebookId) {
-    if (!this.isContextValid()) return { folders: [], unassigned: [] };
-
-    // If in Popup, request data from Content Script (LocalStorage is on the page)
-    if (this.isPopup()) {
-      return new Promise((resolve) => {
-        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-          if (!tabs[0]) return resolve({ folders: [], unassigned: [] });
-          chrome.tabs.sendMessage(tabs[0].id, { action: 'getNotebookConfig', notebookId }, (response) => {
-            resolve(response || { folders: [], unassigned: [] });
-          });
-        });
-      });
-    }
-
-    // If in Content Script, use LocalStorage directly
-    try {
-      const key = `notebook_config_${notebookId}`;
-      const data = localStorage.getItem(key);
-      return data ? JSON.parse(data) : { folders: [], unassigned: [] };
-    } catch (e) {
-      return { folders: [], unassigned: [] };
-    }
-  },
-
-  async saveNotebookConfig(notebookId, config) {
-    if (!this.isContextValid()) return;
-
-    if (this.isPopup()) {
-      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        if (!tabs[0]) return;
-        chrome.tabs.sendMessage(tabs[0].id, { action: 'saveNotebookConfig', notebookId, config });
-      });
-      return;
-    }
-
-    try {
-      const key = `notebook_config_${notebookId}`;
-      localStorage.setItem(key, JSON.stringify(config));
-    } catch (e) {}
-  },
-
-  async getLicenseInfo() {
-    // Permanently Free: Return licensed status for all users
-    return { 
-      installDate: Date.now(), 
-      licenseKey: 'FREE-PERMANENT', 
-      isLicensed: true, 
-      trialDays: 9999 
-    };
-  },
-
-  async setLicense(key, isLicensed) {
-    // No longer needed but kept for compatibility
-    if (this.isContextValid()) {
-      await chrome.storage.sync.set({ 
-        'nb_ext_license_key': key, 
-        'nb_ext_is_licensed': isLicensed 
-      });
-    }
   },
 
   async getEnabledState() {
@@ -91,59 +17,8 @@ var StorageManager = {
   },
 
   async setEnabledState(isEnabled) {
-    if (!this.isContextValid()) return;
-    try {
-      await chrome.storage.sync.set({ 'nb_ext_enabled': isEnabled });
-    } catch (e) {}
-  },
-
-  async getToolbarEnabled() {
-    if (!this.isContextValid()) return true;
-    try {
-      const result = await chrome.storage.local.get('nb_ext_toolbar_enabled');
-      return result.nb_ext_toolbar_enabled !== false;
-    } catch (e) {
-      return true;
-    }
-  },
-
-  async setToolbarEnabled(isEnabled) {
-    if (!this.isContextValid()) return;
-    try {
-      await chrome.storage.local.set({ 'nb_ext_toolbar_enabled': isEnabled });
-    } catch (e) {}
-  },
-
-  async getToolbarExpanded() {
-    if (!this.isContextValid()) return true;
-    try {
-      const result = await chrome.storage.local.get('nb_ext_toolbar_expanded');
-      return result.nb_ext_toolbar_expanded !== false;
-    } catch (e) {
-      return true;
-    }
-  },
-
-  async setToolbarExpanded(isExpanded) {
-    if (!this.isContextValid()) return;
-    try {
-      await chrome.storage.local.set({ 'nb_ext_toolbar_expanded': isExpanded });
-    } catch (e) {}
-  },
-
-  async getTreeViewEnabled() {
-    if (!this.isContextValid()) return true;
-    try {
-      const result = await chrome.storage.local.get('nb_ext_tree_enabled');
-      return result.nb_ext_tree_enabled !== false;
-    } catch (e) {
-      return true;
-    }
-  },
-
-  async setTreeViewEnabled(isEnabled) {
     if (this.isContextValid()) {
-      await chrome.storage.local.set({ 'nb_ext_tree_enabled': isEnabled });
+      await chrome.storage.sync.set({ 'nb_ext_enabled': isEnabled });
     }
   },
 
@@ -163,24 +38,19 @@ var StorageManager = {
     }
   },
 
-  async getCollapsedFolderIds() {
-    if (!this.isContextValid()) return [];
+  async getToolbarEnabled() {
+    if (!this.isContextValid()) return true;
     try {
-      const result = await chrome.storage.local.get('nb_ext_collapsed_ids');
-      return result.nb_ext_collapsed_ids || [];
+      const result = await chrome.storage.local.get('nb_ext_toolbar_enabled');
+      return result.nb_ext_toolbar_enabled !== false;
     } catch (e) {
-      return [];
+      return true;
     }
   },
 
-  async setCollapsedFolderIds(ids) {
+  async setToolbarEnabled(isEnabled) {
     if (this.isContextValid()) {
-      await chrome.storage.local.set({ 'nb_ext_collapsed_ids': ids });
+      await chrome.storage.local.set({ 'nb_ext_toolbar_enabled': isEnabled });
     }
-  },
-
-  extractNotebookId() {
-    const match = window.location.href.match(/notebook\/([a-zA-Z0-9-]+)/);
-    return match ? match[1] : null;
   }
 };
